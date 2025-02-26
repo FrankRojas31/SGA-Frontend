@@ -1,5 +1,6 @@
 import axios from "axios";
 import type { Method } from "axios";
+import Swal from "sweetalert2"; // Asegúrate de importar SweetAlert2
 
 interface RequestOptions {
   url: string;
@@ -9,22 +10,40 @@ interface RequestOptions {
   data?: any;
 }
 
-export async function GenericRequest({url, method, headers = { "Content-Type": "application/json" }, params, data, }:
-  RequestOptions){
-    try {
-      const response = await axios({
-        url,
-        method,
-        headers,
-        params,
-        data,
-      });
+export async function GenericRequest({
+  url,
+  method,
+  headers = { "Content-Type": "application/json" },
+  params,
+  data,
+}: RequestOptions) {
+  try {
+    const response = await axios({
+      url,
+      method,
+      headers,
+      params,
+      data,
+    });
 
-      return response;
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        throw new Error(error.response?.data?.message || error.message);
-      }
-      throw new Error("An unexpected error occurred");
+    return response;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const errorMessage = error.response?.data?.message || "No se pudo conectar con la API. Por favor, intenta de nuevo.";
+      await Swal.fire({
+        icon: "error",
+        title: "¡Ups! Algo salió mal",
+        text: errorMessage,
+        confirmButtonText: "Entendido",
+      });
+      throw new Error(errorMessage);
     }
+    await Swal.fire({
+      icon: "error",
+      title: "Error inesperado",
+      text: "Ocurrió un problema inesperado. Por favor, intenta más tarde.",
+      confirmButtonText: "Entendido",
+    });
+    throw new Error("An unexpected error occurred");
+  }
 }

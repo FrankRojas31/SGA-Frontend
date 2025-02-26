@@ -15,4 +15,5 @@ export enum Status {
 
 export type dataFilter = Omit<IUser, "password">
 
-export type IUserToken = Omit<IUser, "status" | "role" | "username">
+export type IUserToken = Omit<IUser, "status" | "role" | "username" | "password">
+export type IUserSend = Pick<IUser, 'email' | 'password'>

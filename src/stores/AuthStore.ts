@@ -1,11 +1,10 @@
-import { ref, computed } from 'vue'
-import { defineStore } from 'pinia'
+import { ref, computed } from 'vue';
+import { defineStore } from 'pinia';
 import type { IUserToken } from '@/interfaces/UsersTypes/Users';
 import { useStorage } from '@vueuse/core';
-import { LoginAccount, RegisterAccount } from '@/services/auth/userServices';
+import { LoginAccount, RegisterAccount, LogoutAccount } from '@/services/auth/userServices';
 import Swal from 'sweetalert2';
 import { useRouter } from 'vue-router';
-import { LogoutAccount } from '../services/auth/userServices';
 
 export const useAuthStore = defineStore('auth', () => {
   const router = useRouter();
@@ -21,79 +20,81 @@ export const useAuthStore = defineStore('auth', () => {
         user.value = response.data;
         token.value = user.value.token;
 
-        Swal.fire({
-          icon: "success",
-          text: "¡Has iniciado sesión correctamente!",
+        await Swal.fire({
+          icon: 'success',
+          text: '¡Has iniciado sesión correctamente!',
+          timer: 3000,
           timerProgressBar: true,
-          timer: 3000
+          showConfirmButton: false,
         });
 
-        setTimeout(() => {
-          router.push("/dashboard");
-        }, 3000);
+        router.push('/dashboard');
       }
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        text: "Error al iniciar sesión. Verifica tus credenciales.",
-      });
-    }
-  };
-
-  async function Register(email: string, password: string){
-    try
-    {
-      const response = await RegisterAccount(email, password);
-      if(response.status === 200) {
-        Swal.fire({
-          icon: "success",
-          text: "¡Se ha registrado correctamente la cuenta!",
-          timerProgressBar: true,
-          timer: 3000
-        });
-
-        setTimeout(() => {
-          router.push("/login")
-        }, 3000)
-      }
-    }
-    catch(error){
-      Swal.fire({
-        icon: "error",
-        text: "Error al crear cuenta. Verifica el error.",
+    } catch (error: any) {
+      const errorMessage = error.message || 'Error al iniciar sesión. Verifica tus credenciales.';
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error de inicio de sesión',
+        text: errorMessage,
+        confirmButtonText: 'Entendido',
       });
     }
   }
 
-  async function Logout(){
-    try
-    {
+  async function Register(email: string, password: string) {
+    try {
+      const response = await RegisterAccount(email, password);
+
+      if (response.status === 200) {
+        await Swal.fire({
+          icon: 'success',
+          text: '¡Cuenta registrada correctamente! Ahora inicia sesión.',
+          timer: 3000,
+          timerProgressBar: true,
+          showConfirmButton: false,
+        });
+
+        router.push('/login');
+      }
+    } catch (error: any) {
+      const errorMessage = error.message || 'Error al crear la cuenta. Verifica los datos.';
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error de registro',
+        text: errorMessage,
+        confirmButtonText: 'Entendido',
+      });
+    }
+  }
+
+  async function Logout() {
+    try {
       const response = await LogoutAccount(user.value.token);
-      if (response.status === 200){
+
+      if (response.status === 200) {
         user.value = {} as IUserToken;
         token.value = '';
 
-        Swal.fire({
+        await Swal.fire({
           icon: 'success',
-          text: 'Usuario deslogueado correctamente',
+          text: '¡Has cerrado sesión correctamente!',
           timer: 3000,
-          timerProgressBar: true
-        })
+          timerProgressBar: true,
+          showConfirmButton: false,
+        });
 
-        setTimeout(() => {
-          router.push("/login");
-        }, 3000)
+        router.push('/login');
       }
-    }
-    catch(error){
-      Swal.fire({
-        icon: "error",
-        text: "Error al cerrar sesión. Verifica el error con el administrador.",
+    } catch (error: any) {
+      const errorMessage = error.message || 'Error al cerrar sesión. Contacta al administrador.';
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error al cerrar sesión',
+        text: errorMessage,
+        confirmButtonText: 'Entendido',
       });
     }
   }
 
-
-
-  return { token, isLogged, Login, Logout, Register}
-})
+  return { token, isLogged, Login, Logout, Register };
+});
