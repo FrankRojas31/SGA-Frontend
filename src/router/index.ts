@@ -62,17 +62,31 @@ router.beforeEach((to, from, next) => {
   const verifyAuth = isAuth().value
   const publicRoutes = ['/login', '/register', '/NotFound']
   const requiresAuth = !publicRoutes.includes(to.path)
+  const isFirstLoad = !from.path || from.path === '/'
+
+  if (isFirstLoad && to.path === '/') {
+    if (!verifyAuth) {
+      next('/login')
+      return
+    } else {
+      next('/dashboard')
+      return
+    }
+  }
 
   if (requiresAuth && !verifyAuth) {
     if (to.matched.length) {
-      return next('/NotFound')
+      next('/NotFound')
+      return
     } else {
-      return next('/login')
+      next('/login')
+      return
     }
   }
 
   if (verifyAuth && (to.name === 'login' || to.name === 'register')) {
-    return next('/dashboard')
+    next('/dashboard')
+    return
   }
 
   next()

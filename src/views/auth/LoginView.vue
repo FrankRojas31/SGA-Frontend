@@ -11,7 +11,10 @@
   const { errors, defineField, handleSubmit } = useForm({
     validationSchema: toTypedSchema(
       yup.object({
-        email: yup.string().email('Correo Incorrecto').required('El correo es requerido'),
+        email: yup
+          .string()
+          .email('Correo Incorrecto')
+          .required('El correo es requerido'),
         password: yup
           .string()
           .min(8, 'La contraseña debe tener al menos 8 caracteres')
@@ -28,7 +31,10 @@
   })
 
   const onSubmit = handleSubmit((values: IUserSend) => {
-      const results = (Object.keys(errors.value).length === 0) ? auth.Login(values.email, values.password) : console.error("Ocurrio un error");
+    const results =
+      Object.keys(errors.value).length === 0
+        ? auth.Login(values.email, values.password)
+        : console.error('Ocurrio un error')
   })
 </script>
 
@@ -151,7 +157,7 @@
               </button>
             </div>
             <div class="text-center w-full mt-3 mb-3">
-              <label class="text-sm">¿No tienes cuenta? </label>
+              <label class="text-sm">¿No tienes cuenta?</label>
               <RouterLink
                 to="/register"
                 class="underline text-sm text-gray-600 hover:text-gray-900"
