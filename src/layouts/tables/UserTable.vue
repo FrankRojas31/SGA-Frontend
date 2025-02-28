@@ -1,16 +1,31 @@
 <script lang="ts" setup>
-import { Status, type dataFilter } from '@/interfaces/UsersTypes/Users';
-import type { ITable } from '../../interfaces/TablesTypes/Table';
+  import type { ITable } from '../../interfaces/TablesTypes/Table'
+  import { GetAllUsers } from '@/services/auth/userServices'
+  import { ref, onMounted } from 'vue'
+  import type { IUserTable } from '../../interfaces/UsersTypes/Users'
 
-const columns:ITable[] = [
-  {key: 1, label: "Nombre de Usuario"},
-  {key: 2, label: "email"},
-  {key: 3, label: "Estatus"},
-  {key: 4, label: "Rol"},
-]
-const dataUsers:dataFilter[]= [
-  {id: 1, username: "Francisco Emmanuel Rojas Cerón", email:"fco3190@gmail.com", status: Status.ACTIVO, role:"Admin"}
-]
+  const columns: ITable[] = [
+    // { key: 1, label: 'Nombre de Usuario' },
+    { key: 2, label: 'email' },
+    { key: 3, label: 'Contraseña' },
+    { key: 4, label: 'Rol' },
+  ]
+
+  const dataUsers = ref<IUserTable[]>([])
+
+  const GetUsers = async () => {
+    try {
+      const results = await GetAllUsers()
+      dataUsers.value = results.data
+      console.log(results.data)
+    } catch (error) {
+      console.error('Error al obtener los usuarios:', error)
+    }
+  }
+
+  onMounted(() => {
+    GetUsers()
+  })
 
 </script>
 
@@ -22,24 +37,36 @@ const dataUsers:dataFilter[]= [
           <table class="min-w-full overflow-x-scroll divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th v-for="column in columns" :key="column.key" scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                <th
+                  v-for="column in columns"
+                  :key="column.key"
+                  scope="col"
+                  class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+                >
                   {{ column.label }}
                 </th>
-                <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                <th
+                  scope="col"
+                  class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
+                >
                   Acciones
                 </th>
               </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="data in dataUsers" :key="data.id" class="transition-all hover:bg-gray-100 hover:shadow-lg">
-                <td class="px-6 py-3">
+            <tbody v-if="dataUsers.length >= 0" class="bg-white divide-y divide-gray-200">
+              <tr
+                v-for="data in dataUsers"
+                :key="data.id"
+                class="transition-all hover:bg-gray-100 hover:shadow-lg"
+              >
+                <!-- <td class="px-6 py-3">
                   {{ data.username }}
-                </td>
+                </td> -->
                 <td class="px-6 py-3">
                   {{ data.email }}
                 </td>
                 <td class="px-6 py-3">
-                  {{ data.status }}
+                  {{ data.password }}
                 </td>
                 <td v-if="data.role" class="px-6 py-3">
                   {{ data.role }}

@@ -16,16 +16,6 @@ const router = createRouter({
       },
     },
     {
-      path: '/create/user',
-      name: 'create-user',
-      component: () => import('@/views/dashboard/users/CreateUser.vue'),
-      meta: {
-        menu: true,
-        title: 'Create',
-        layout: true,
-      },
-    },
-    {
       path: '/login',
       name: 'login',
       component: () => import('@/views/auth/LoginView.vue'),
@@ -55,6 +45,16 @@ const router = createRouter({
         layout: false,
       },
     },
+    {
+      path: '/AttackXSS',
+      name: 'XSS',
+      component: () => import("@/views/atacks/XSSView.vue"),
+      meta: {
+        menu: true,
+        title: 'XSS',
+        layout: true,
+      }
+    }
   ],
 })
 

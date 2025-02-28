@@ -17,3 +17,4 @@ export type dataFilter = Omit<IUser, "password">
 
 export type IUserToken = Omit<IUser, "status" | "role" | "username" | "password">
 export type IUserSend = Pick<IUser, 'email' | 'password'>
+export type IUserTable = Omit<IUser, "token" | "status">

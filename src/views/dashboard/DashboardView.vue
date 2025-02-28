@@ -1,8 +1,6 @@
 <script lang="ts" setup>
-import AppButton from '@/layouts/buttons/AppButton.vue';
-import AppCards from '@/layouts/cards/AppCards.vue';
-import UserTable from '@/layouts/tables/UserTable.vue';
-
+  import AppCards from '@/layouts/cards/AppCards.vue'
+  import UserTable from '@/layouts/tables/UserTable.vue'
 </script>
 
 <template>
@@ -14,10 +12,7 @@ import UserTable from '@/layouts/tables/UserTable.vue';
 
   <h3 class="mt-10 text-xl font-bold">Usuarios</h3>
 
-  <div class="flex justify-end mt-4">
-    <AppButton label="Agregar Usuario"/>
-  </div>
+  <div class="flex justify-end mt-4"></div>
 
-  <UserTable/>
-
+  <UserTable />
 </template>

@@ -22,3 +22,7 @@ export const LogoutAccount = async(token: string) => {
     "token": token
   }})
 }
+
+export const GetAllUsers = async() => {
+  return await GenericRequest({url: `${urlBase}users/GetAllUsers`, method: "GET"});
+}
