@@ -45,12 +45,12 @@
                 >
                   {{ column.label }}
                 </th>
-                <th
+                <!-- <th
                   scope="col"
                   class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase"
                 >
                   Acciones
-                </th>
+                </th> -->
               </tr>
             </thead>
             <tbody v-if="dataUsers.length >= 0" class="bg-white divide-y divide-gray-200">
@@ -71,12 +71,12 @@
                 <td v-if="data.role" class="px-6 py-3">
                   {{ data.role }}
                 </td>
-                <td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
+                <!-- <td class="px-6 py-4 text-sm font-medium text-right whitespace-nowrap">
                   <div class="flex space-x-4">
                     <a href="#" class="text-indigo-600 hover:text-indigo-900">Editar</a>
                     <a href="#" class="text-red-600 hover:text-red-900">Eliminar</a>
                   </div>
-                </td>
+                </td> -->
               </tr>
             </tbody>
           </table>

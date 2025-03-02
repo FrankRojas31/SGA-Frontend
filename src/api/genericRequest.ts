@@ -1,19 +1,19 @@
-import axios from "axios";
-import type { Method } from "axios";
-import Swal from "sweetalert2"; // Asegúrate de importar SweetAlert2
+import axios from 'axios'
+import type { Method } from 'axios'
+import Swal from 'sweetalert2' // Asegúrate de importar SweetAlert2
 
 interface RequestOptions {
-  url: string;
-  method: Method;
-  headers?: Record<string, string>;
-  params?: Record<string, any>;
-  data?: any;
+  url: string
+  method: Method
+  headers?: Record<string, string>
+  params?: Record<string, any>
+  data?: any
 }
 
 export async function GenericRequest({
   url,
   method,
-  headers = { "Content-Type": "application/json" },
+  headers = { 'Content-Type': 'application/json' },
   params,
   data,
 }: RequestOptions) {
@@ -24,26 +24,22 @@ export async function GenericRequest({
       headers,
       params,
       data,
-    });
+    })
 
-    return response;
+    return response
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      const errorMessage = error.response?.data?.message || "No se pudo conectar con la API. Por favor, intenta de nuevo.";
+      const errorMessage =
+        error.response?.data?.error ||
+        'No se pudo conectar con la API. Por favor, intenta de nuevo.'
       await Swal.fire({
-        icon: "error",
-        title: "¡Ups! Algo salió mal",
+        icon: 'error',
+        title: '¡Ups! Algo salió mal',
         text: errorMessage,
-        confirmButtonText: "Entendido",
-      });
-      throw new Error(errorMessage);
+        confirmButtonText: 'Entendido',
+      })
+      throw new Error(errorMessage)
     }
-    await Swal.fire({
-      icon: "error",
-      title: "Error inesperado",
-      text: "Ocurrió un problema inesperado. Por favor, intenta más tarde.",
-      confirmButtonText: "Entendido",
-    });
-    throw new Error("An unexpected error occurred");
+    throw new Error('An unexpected error occurred')
   }
 }

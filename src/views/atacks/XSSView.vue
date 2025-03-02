@@ -13,34 +13,47 @@
   console.log(userId.user.id)
 
   const HandleSubmit = async () => {
-    const body: ICommentSend = {
-      user_id: userId.user.id,
-      comment: commentIn.value,
-    }
-    const results = await addComentts(body)
+    const comment = commentIn.value.trim()
 
-    if (results.status === 200) {
+    if (comment.length === 0) {
       Swal.fire({
-        title: 'Correcto',
-        text: 'Tu comentario se ha agregado correctamente',
-        icon: 'success',
-        showConfirmButton: false,
-        timer: 2000,
-        timerProgressBar: true,
-      })
-
-      commentIn.value = '';
-
-      await GetComments()
-    } else {
-      Swal.fire({
-        title: 'Error',
-        text: 'Ocurrio un error',
         icon: 'error',
+        title: '¡Comentario Vacio!',
+        text: 'Tu comentario esta fuera de lugar XD',
         showConfirmButton: false,
         timer: 2000,
         timerProgressBar: true,
       })
+    } else {
+      const body: ICommentSend = {
+        user_id: userId.user.id,
+        comment: comment,
+      }
+      const results = await addComentts(body)
+
+      if (results.status === 200) {
+        Swal.fire({
+          title: 'Correcto',
+          text: 'Tu comentario se ha agregado correctamente',
+          icon: 'success',
+          showConfirmButton: false,
+          timer: 2000,
+          timerProgressBar: true,
+        })
+
+        commentIn.value = ''
+
+        await GetComments()
+      } else {
+        Swal.fire({
+          title: 'Error',
+          text: 'Ocurrio un error',
+          icon: 'error',
+          showConfirmButton: false,
+          timer: 2000,
+          timerProgressBar: true,
+        })
+      }
     }
   }
 
@@ -92,8 +105,11 @@
             </h3>
           </div>
 
-          <div v-html="comment.comment" style="width: 90%" class="text-gray-600 text-lg text-center md:text-left">
-          </div>
+          <div
+            v-html="comment.comment"
+            style="width: 90%"
+            class="text-gray-600 text-lg text-center md:text-left"
+          ></div>
         </div>
       </div>
     </div>

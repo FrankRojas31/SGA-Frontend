@@ -31,13 +31,7 @@ export const useAuthStore = defineStore('auth', () => {
         router.push('/dashboard')
       }
     } catch (error: any) {
-      const errorMessage = error.message || 'Error al iniciar sesión. Verifica tus credenciales.'
-      await Swal.fire({
-        icon: 'error',
-        title: 'Error de inicio de sesión',
-        text: errorMessage,
-        confirmButtonText: 'Entendido',
-      })
+      console.error(error)
     }
   }
 
@@ -57,13 +51,7 @@ export const useAuthStore = defineStore('auth', () => {
         await Login(email, password)
       }
     } catch (error: any) {
-      const errorMessage = error.message || 'Error al crear la cuenta. Verifica los datos.'
-      await Swal.fire({
-        icon: 'error',
-        title: 'Error de registro',
-        text: errorMessage,
-        confirmButtonText: 'Entendido',
-      })
+      console.log(error);
     }
   }
 
@@ -86,13 +74,7 @@ export const useAuthStore = defineStore('auth', () => {
         router.push('/login')
       }
     } catch (error: any) {
-      const errorMessage = error.message || 'Error al cerrar sesión. Contacta al administrador.'
-      await Swal.fire({
-        icon: 'error',
-        title: 'Error al cerrar sesión',
-        text: errorMessage,
-        confirmButtonText: 'Entendido',
-      })
+      console.error(error);
     }
   }
 
