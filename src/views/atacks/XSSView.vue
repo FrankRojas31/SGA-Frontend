@@ -6,11 +6,9 @@
   import Swal from 'sweetalert2'
   import { GetCommentss } from '../../services/attacks/xssServices'
 
-  const userId = useAuthStore()
+  const user = useAuthStore()
   const commentIn = ref('')
   const comments = ref<IComments[]>([])
-
-  console.log(userId.user.id)
 
   const HandleSubmit = async () => {
     const comment = commentIn.value.trim()
@@ -26,7 +24,7 @@
       })
     } else {
       const body: ICommentSend = {
-        user_id: userId.user.id,
+        user_id: user.user!.id,
         comment: comment,
       }
       const results = await addComentts(body)

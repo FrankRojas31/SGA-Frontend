@@ -48,13 +48,23 @@ const router = createRouter({
     {
       path: '/AttackXSS',
       name: 'XSS',
-      component: () => import("@/views/atacks/XSSView.vue"),
+      component: () => import('@/views/atacks/XSSView.vue'),
       meta: {
         menu: true,
         title: 'XSS',
         layout: true,
-      }
-    }
+      },
+    },
+    {
+      path: '/Items',
+      name: 'Items',
+      component: () => import('@/views/atacks/SQLView.vue'),
+      meta: {
+        menu: true,
+        title: 'Items',
+        layout: true,
+      },
+    },
   ],
 })
 

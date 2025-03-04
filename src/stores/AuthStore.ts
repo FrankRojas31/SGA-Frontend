@@ -1,24 +1,55 @@
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { defineStore } from 'pinia'
 import type { IUserToken } from '@/interfaces/UsersTypes/Users'
 import { useStorage } from '@vueuse/core'
-import { LoginAccount, RegisterAccount, LogoutAccount } from '@/services/auth/userServices'
+import {
+  LoginAccount,
+  RegisterAccount,
+  LogoutAccount,
+  RefreshToken,
+} from '@/services/auth/userServices'
 import Swal from 'sweetalert2'
 import { useRouter } from 'vue-router'
+import { jwtDecode } from 'jwt-decode'
 
 export const useAuthStore = defineStore('auth', () => {
   const router = useRouter()
-  const user = ref({} as IUserToken)
-  const token = useStorage('token', '')
-  const isLogged = computed(() => token.value !== '' && token.value !== undefined)
+  const refreshToken = useStorage('refreshToken', '')
+  const accessToken = useStorage('accessToken', '')
+  const user = ref<IUserToken | null>(null)
+
+  const isLogged = computed(() => !!accessToken.value && !!refreshToken.value)
+
+  const decodedToken = computed(() => {
+    if (!accessToken.value) return null
+    try {
+      return jwtDecode<IUserToken>(accessToken.value)
+    } catch (error) {
+      console.error('Error al decodificar el token:', error)
+      return null
+    }
+  })
+
+  const updateUserFromToken = () => {
+    user.value = decodedToken.value
+  }
+
+  watch(
+    accessToken,
+    () => {
+      updateUserFromToken()
+    },
+    { immediate: true }
+  )
 
   async function Login(email: string, password: string) {
     try {
       const response = await LoginAccount(email, password)
 
       if (response.status === 200) {
-        user.value = response.data
-        token.value = user.value.token
+        accessToken.value = response.data.accessToken
+        refreshToken.value = response.data.refreshToken
+        updateUserFromToken()
 
         await Swal.fire({
           icon: 'success',
@@ -51,17 +82,18 @@ export const useAuthStore = defineStore('auth', () => {
         await Login(email, password)
       }
     } catch (error: any) {
-      console.log(error);
+      console.log(error)
     }
   }
 
   async function Logout() {
     try {
-      const response = await LogoutAccount(user.value.token)
+      const response = await LogoutAccount(accessToken.value)
 
       if (response.status === 200) {
-        user.value = {} as IUserToken
-        token.value = ''
+        accessToken.value = ''
+        refreshToken.value = ''
+        user.value = null
 
         await Swal.fire({
           icon: 'success',
@@ -74,9 +106,24 @@ export const useAuthStore = defineStore('auth', () => {
         router.push('/login')
       }
     } catch (error: any) {
-      console.error(error);
+      console.error(error)
     }
   }
 
-  return { token, isLogged, Login, Logout, Register, user }
+  async function refreshAccessToken() {
+    try {
+      const response = await RefreshToken(refreshToken.value)
+      if (response.status === 200) {
+        accessToken.value = response.data.accessToken
+        updateUserFromToken()
+      } else {
+        await Logout()
+      }
+    } catch (error) {
+      console.error('Error al refrescar el token:', error)
+      await Logout()
+    }
+  }
+
+  return { accessToken, refreshToken, isLogged, Login, Logout, Register, refreshAccessToken, user }
 })

@@ -1,13 +1,16 @@
 import { ConnectionAPI } from "@/api/connectionAPI"
 import { GenericRequest } from "@/api/genericRequest"
 import type { ICommentSend } from "@/interfaces/attacks/xss";
+import { useAuthStore } from "@/stores/AuthStore";
 
 const urlBase = ConnectionAPI();
-
+const auth = useAuthStore();
 export const addComentts = async (sendData: ICommentSend) => {
   return await GenericRequest({ url: `${urlBase}attack/xss`, method: "POST",data: sendData});
 }
 
 export const GetCommentss = async () => {
-  return await GenericRequest({ url: `${urlBase}attack/xss`, method: "GET"});
+  return await GenericRequest({ url: `${urlBase}attack/xss`, method: "GET", params: {
+    "userId": auth.user?.id,
+  }});
 }
