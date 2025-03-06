@@ -29,13 +29,3 @@ export const RegisterAccount = async (values: IUser) => {
     },
   })
 }
-
-export const LogoutAccount = async (token: string) => {
-  return await GenericRequest({
-    url: `${urlBase}users/logout`,
-    method: 'POST',
-    data: {
-      token: token,
-    },
-  })
-}

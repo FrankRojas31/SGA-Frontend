@@ -6,7 +6,7 @@
 <template>
 
 <AppSidebar>
-  <div class="font-semibold text-xl mb-4 mt-4 text-center">TODOS LOS ALUMNOS</div>
+  <div class="font-semibold text-xl mb-4 mt-4 text-center">ALUMNOS</div>
   <TableStudent class="px-6"/>
 </AppSidebar>
 </template>

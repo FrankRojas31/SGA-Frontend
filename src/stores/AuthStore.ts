@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { useRouter } from 'vue-router'
-import { LoginAccount, LogoutAccount, RegisterAccount } from '../api/clients/auth/userServices'
+import { LoginAccount, RegisterAccount } from '../api/clients/auth/userServices'
 import { EstatusUsuario, Rol, type ILoginUser, type IUser, type IUserSend } from '@/types/Users'
 import Swal from 'sweetalert2'
 import type { ResponseHelper } from '@/types/ResponseHelper'
@@ -10,7 +10,7 @@ import type { IUserStorage } from '@/types/Users'
 export const useAuthStore = defineStore('auth', () => {
   const router = useRouter()
 
-  const user = useStorage<IUserStorage | null>('usuario', null, undefined, {
+  const user = useStorage<IUserStorage | null>('user', null, undefined, {
     serializer: {
       read: (v) => (v ? JSON.parse(v) : null),
       write: (v) => JSON.stringify(v),
@@ -87,5 +87,5 @@ export const useAuthStore = defineStore('auth', () => {
     router.push("/login");
   }
 
-  return { Register, Login, user }
+  return { Register, Login, user , Logout }
 })

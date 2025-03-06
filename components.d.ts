@@ -39,9 +39,12 @@ declare module 'vue' {
     TableGroupComponent: typeof import('./src/components/groups/TableGroupComponent.vue')['default']
     TableQualifications: typeof import('./src/components/qualifications/TableQualifications.vue')['default']
     TableStudentComponent: typeof import('./src/components/students/TableStudentComponent.vue')['default']
+    TableSubjectComponent: typeof import('./src/components/subjects/TableSubjectComponent.vue')['default']
+    TableTeacherComponent: typeof import('./src/components/teachers/TableTeacherComponent.vue')['default']
     Tag: typeof import('primevue/tag')['default']
     ToggleButton: typeof import('primevue/togglebutton')['default']
     TopbarWidget: typeof import('./src/components/ui/landing/TopbarWidget.vue')['default']
+    UnitCardComponent: typeof import('./src/components/units/UnitCardComponent.vue')['default']
   }
   export interface ComponentCustomProperties {
     StyleClass: typeof import('primevue/styleclass')['default']

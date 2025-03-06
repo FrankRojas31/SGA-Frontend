@@ -6,6 +6,6 @@
 <template>
   <AppSidebar>
     <div class="font-semibold text-xl mb-4 text-center mt-4">GRUPOS</div>
-    <TableGroup />
+    <TableGroup class="px-6" />
   </AppSidebar>
 </template>

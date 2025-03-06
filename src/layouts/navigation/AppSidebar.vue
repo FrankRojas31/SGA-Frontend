@@ -51,12 +51,16 @@ onMounted(() => {
           <i :class="ruta.icon" class="mr-2"></i>
           {{ ruta.meta?.title }}
         </RouterLink>
-        <div class="mt-1 text-center rounded-xs block px-4 py-3 hover:bg-gray-400">
-        <button @click="auth.Logout">
-          Cerrar Sesion
-        </button>
-      </div>
       </nav>
+      <div class="mb-10">
+      <button
+        @click="auth.Logout"
+        class="w-full rounded-xs px-4 py-3 bg-red-600 hover:bg-red-700 text-white flex items-center justify-center"
+      >
+        <i class="pi pi-sign-out mr-2"></i>
+        Cerrar Sesión
+      </button>
+    </div>
     </div>
 
     <!-- Main -->

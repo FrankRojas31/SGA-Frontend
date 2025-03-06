@@ -75,7 +75,7 @@ const router = createRouter({
     {
       path: '/subject',
       name: 'Materias',
-      component: () => import('@/features/groups/GroupsFeat.vue'),
+      component: () => import('@/features/subjects/SubjectFeat.vue'),
       meta: {
         menu: true,
         title: 'Materias',
@@ -100,16 +100,6 @@ const router = createRouter({
         menu: true,
         title: 'Profesores',
         icon: 'pi pi-th-large',
-      },
-    },
-    {
-      path: '/records',
-      name: 'Boletas',
-      component: () => import('@/features/records/RecordsFeat.vue'),
-      meta: {
-        menu: true,
-        title: 'Boletas',
-        icon: 'pi pi-list',
       },
     },
     {
