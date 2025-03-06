@@ -50,7 +50,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import Button from "primevue/button";
@@ -115,7 +115,7 @@ const openCreateModal = async () => {
   }
 };
 
-const createTeacher = async (teacher: Omit<ITeacher, "id">) => {
+const createTeacher = async (teacher: ITeacher) => {
   try {
     loading.value = true;
     const response = await PostTeacher(teacher);
@@ -145,9 +145,9 @@ const openEditModal = async (index: number) => {
   const { value: formValues } = await Swal.fire({
     title: "Editar Profesor",
     html: `
-      <input id="swal-nombre" class="swal2-input" value="${teacher.nombre}" placeholder="Nombre" />
-      <input id="swal-apellidoPaterno" class="swal2-input" value="${teacher.apellidoPaterno}" placeholder="Apellido Paterno" />
-      <input id="swal-apellidoMaterno" class="swal2-input" value="${teacher.apellidoMaterno}" placeholder="Apellido Materno" />
+      <input id="swal-nombre" class="swal2-input" value="${teacher.nombres}" placeholder="Nombre" />
+      <input id="swal-apellidoPaterno" class="swal2-input" value="${teacher.apellido_Paterno}" placeholder="Apellido Paterno" />
+      <input id="swal-apellidoMaterno" class="swal2-input" value="${teacher.apellido_Materno}" placeholder="Apellido Materno" />
       <input id="swal-especialidad" class="swal2-input" value="${teacher.especialidad}" placeholder="Especialidad" />
       <input id="swal-grado" class="swal2-input" value="${teacher.grado}" placeholder="Grado" />
       <input id="swal-cedula" class="swal2-input" value="${teacher.cedula}" placeholder="Cédula" />
@@ -209,7 +209,7 @@ const confirmDelete = async (index: number) => {
   const result = await Swal.fire({
     icon: "warning",
     title: "¿Estás seguro?",
-    text: `Eliminarás a ${teacher.nombre} ${teacher.apellidoPaterno}. Esta acción no se puede deshacer.`,
+    text: `Eliminarás a ${teacher.nombres} ${teacher.apellido_Paterno}. Esta acción no se puede deshacer.`,
     showCancelButton: true,
     confirmButtonText: "Eliminar",
     cancelButtonText: "Cancelar",
@@ -231,7 +231,7 @@ const deleteTeacher = async (index: number) => {
     await Swal.fire({
       icon: "success",
       title: "¡Profesor eliminado!",
-      text: `${teacher.nombre} ${teacher.apellidoPaterno} ha sido eliminado exitosamente.`,
+      text: `${teacher.nombres} ${teacher.apellido_Paterno} ha sido eliminado exitosamente.`,
       timer: 1500,
       showConfirmButton: false,
     });
@@ -248,5 +248,7 @@ const deleteTeacher = async (index: number) => {
 };
 
 
-loadTeachers();
+onMounted(async() =>{
+  await loadTeachers();
+})
 </script>

@@ -53,116 +53,112 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from "vue";
-import Swal from "sweetalert2";
-import Card from "primevue/card";
-import Button from "primevue/button";
-import { GetUnits, PostUnit, UpdateUnit, DeleteUnit } from "@/api/clients/units/unitsClient";
+  import { ref, onMounted } from 'vue'
+  import Swal from 'sweetalert2'
+  import { GetUnits, PostUnit, UpdateUnit, DeleteUnit } from '@/api/clients/units/unitsClient'
+  import type { ResponseHelper } from '@/types/ResponseHelper'
+  import type { IUnits } from '@/types/Units'
 
+  const cards = ref<IUnits[]>([])
 
-const cards = ref([]);
-
-
-const loadUnits = async () => {
-  try {
-    const response = await GetUnits();
-    console.log("data",response.data.data);
-    if (response.status === 200 && Array.isArray(response.data.data)) {
-      cards.value = response.data.data.filter(unit => !unit.esBorrado);
-
-    } else {
-      console.error("Formato de respuesta inesperado:", response);
+  const loadUnits = async () => {
+    try {
+      const response = await GetUnits()
+      const unitCast = response.data as ResponseHelper<IUnits[]>
+      if (response.status === 200 && unitCast) {
+        cards.value = unitCast.data!
+      } else {
+        console.error('Formato de respuesta inesperado:', response)
+      }
+    } catch (error) {
+      console.error('Error al cargar unidades:', error)
     }
-  } catch (error) {
-    console.error("Error al cargar unidades:", error);
   }
-};
 
-const openCreateModal = async () => {
-  const { value: formValues } = await Swal.fire({
-    title: "Agregar Nueva Unidad",
-    html: `
+  const openCreateModal = async () => {
+    const { value: formValues } = await Swal.fire({
+      title: 'Agregar Nueva Unidad',
+      html: `
       <input id="swal-nombre" class="swal2-input" placeholder="Nombre" />
       <textarea id="swal-descripcion" class="swal2-textarea" placeholder="Descripción"></textarea>
     `,
-    focusConfirm: false,
-    showCancelButton: true,
-    confirmButtonText: "Agregar",
-    cancelButtonText: "Cancelar",
-    preConfirm: () => {
-      const nombre = (document.getElementById("swal-nombre") as HTMLInputElement).value;
-      const descripcion = (document.getElementById("swal-descripcion") as HTMLTextAreaElement).value;
-      if (!nombre || !descripcion) {
-        Swal.showValidationMessage("Completa todos los campos.");
-        return false;
-      }
-      return { nombre, descripcion };
-    },
-  });
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: 'Agregar',
+      cancelButtonText: 'Cancelar',
+      preConfirm: () => {
+        const nombre = (document.getElementById('swal-nombre') as HTMLInputElement).value
+        const descripcion = (document.getElementById('swal-descripcion') as HTMLTextAreaElement)
+          .value
+        if (!nombre || !descripcion) {
+          Swal.showValidationMessage('Completa todos los campos.')
+          return false
+        }
+        return { nombre, descripcion }
+      },
+    })
 
-  if (formValues) {
-    await createUnit(formValues);
+    if (formValues) {
+      await createUnit(formValues)
+    }
   }
-};
 
-
-const createUnit = async (unit) => {
-  try {
-    const newUnit = await PostUnit(unit);
-    loadUnits()
-    Swal.fire("¡Unidad creada!", `${newUnit.nombre} ha sido agregada.`, "success");
-  } catch (error) {
-    Swal.fire("Error", "No se pudo crear la unidad.", "error");
+  const createUnit = async (unit: IUnits) => {
+    try {
+      const newUnit = await PostUnit(unit)
+      const unitCast = newUnit.data as ResponseHelper<IUnits>
+      await loadUnits()
+      Swal.fire('¡Unidad creada!', `${unitCast.data?.nombre} ha sido agregada.`, 'success')
+    } catch (error) {
+      Swal.fire('Error', 'No se pudo crear la unidad.', 'error')
+    }
   }
-};
 
-
-const editCard = (index) => {
-  cards.value[index].isEditing = true;
-};
-
-const updateCard = async (index) => {
-  const unitToUpdate = cards.value[index];
-
-  try {
-    await UpdateUnit(unitToUpdate);
-    unitToUpdate.isEditing = false;
-
-    Swal.fire("¡Unidad actualizada!", "Los cambios han sido guardados.", "success");
-  } catch (error) {
-    Swal.fire("Error", "No se pudo actualizar la unidad.", "error");
+  const editCard = (index: number) => {
+    cards.value[index].isEditing = true
   }
-};
 
-// Confirmar eliminación
-const confirmDelete = async (index) => {
-  const result = await Swal.fire({
-    icon: "warning",
-    title: "¿Eliminar unidad?",
-    text: `Eliminarás "${cards.value[index].nombre}". Esta acción no se puede deshacer.`,
-    showCancelButton: true,
-    confirmButtonText: "Sí, eliminar",
-    cancelButtonText: "Cancelar",
-    confirmButtonColor: "#d33",
-    cancelButtonColor: "#3085d6",
-  });
+  const updateCard = async (index: number) => {
+    const unitToUpdate = cards.value[index]
+    try {
+      await UpdateUnit(unitToUpdate)
+      unitToUpdate.isEditing = false
 
-  if (result.isConfirmed) {
-    await deleteCard(index);
+      Swal.fire('¡Unidad actualizada!', 'Los cambios han sido guardados.', 'success')
+    } catch (error) {
+      Swal.fire('Error', 'No se pudo actualizar la unidad.', 'error')
+    }
   }
-};
 
-// Eliminar una unidad
-const deleteCard = async (index) => {
-  const unitId = cards.value[index].id;
-  try {
-    await DeleteUnit(unitId);
-    cards.value.splice(index, 1);
-    Swal.fire("¡Unidad eliminada!", "Se ha eliminado correctamente.", "success");
-  } catch (error) {
-    Swal.fire("Error", "No se pudo eliminar la unidad.", "error");
+  const confirmDelete = async (index: number) => {
+    const result = await Swal.fire({
+      icon: 'warning',
+      title: '¿Eliminar unidad?',
+      text: `Eliminarás "${cards.value[index].nombre}". Esta acción no se puede deshacer.`,
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+    })
+
+    if (result.isConfirmed) {
+      await deleteCard(index)
+    }
   }
-};
 
-onMounted(loadUnits);
+  const deleteCard = async (index: number) => {
+    const unitId = cards.value[index].id
+    try {
+      await DeleteUnit(unitId)
+      await loadUnits()
+      Swal.fire('¡Unidad eliminada!', 'Se ha eliminado correctamente.', 'success')
+    } catch (error) {
+      Swal.fire('Error', 'No se pudo eliminar la unidad.', 'error')
+    }
+  }
+
+  onMounted(async () => {
+    await loadUnits()
+  })
 </script>

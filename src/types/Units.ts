@@ -3,4 +3,5 @@ export interface IUnits {
   esBorrado: boolean
   nombre: string
   descripcion: string
+  isEditing: boolean
 }
