@@ -1,5 +1,6 @@
-import { ConnectionAPI } from "@/api/connectionAPI";
-import { GenericRequest } from "@/api/genericRequest";
+import { ConnectionAPI } from '@/api/connectionAPI'
+import { GenericRequest } from '@/api/genericRequest'
+import type { IUnits } from '@/types/Units'
 
 const url = ConnectionAPI();
 const base = url + "/Unidades";
@@ -9,7 +10,7 @@ export const GetUnits = async () => {
   return await GenericRequest({ url: base, method: "GET" });
 };
 
-export const PostUnits = async (values) => {
+export const PostUnit = async (values: IUnits) => {
   return await GenericRequest({
     url: base,
     method: "POST",
@@ -21,14 +22,14 @@ export const PostUnits = async (values) => {
   });
 };
 
-export const UpdateUnits = async (values) => {
+export const UpdateUnit = async (values: IUnits) => {
   return await GenericRequest({
     url: `${base}/${values.id}`,
-    method: "PUT",
+    method: 'PUT',
     data: {
       nombre: values.nombre,
       descripcion: values.descripcion,
-      esBorrado: values.esBorrado || false,
+      esBorrado: false,
     },
   });
 };
