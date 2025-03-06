@@ -32,6 +32,7 @@ export const UpdateTeacher = async (values: ITeacher) => {
     url: `${base}/${values.id}`,
     method: 'PUT',
     data: {
+      id: values.id,
       nombres: values.nombres,
       apellido_Materno: values.apellido_Materno,
       apellido_Paterno: values.apellido_Paterno,

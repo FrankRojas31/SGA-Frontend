@@ -26,6 +26,7 @@ export const UpdateGroup = async (values: IGroups) => {
     url: `${base}/${values.id}`,
     method: 'PUT',
     data: {
+      id: values.id,
       nombre: values.nombre,
       descripcion: values.descripcion,
       esBorrado: false,

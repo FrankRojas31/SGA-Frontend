@@ -26,6 +26,7 @@ export const UpdateSubject = async (values: ISubject) => {
       url: `${base}/${values.id}`,
       method: 'PUT',
       data: {
+        id: values.id,
         nombre: values.nombre,
         descripcion: values.descripcion,
         esBorrado: false,

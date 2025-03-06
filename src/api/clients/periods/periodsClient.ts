@@ -14,6 +14,7 @@ export const PostPeriods = async (values: IPeriods) => {
     url: base,
     method: 'POST',
     data: {
+      id: values.id,
       nombre: values.nombre,
       esBorrado: false,
       fechaInicio: values.fechaInicio,
