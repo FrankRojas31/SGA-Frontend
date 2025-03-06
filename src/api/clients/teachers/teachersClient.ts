@@ -15,8 +15,8 @@ export const PostTeacher = async (values: ITeacher) => {
     method: 'POST',
     data: {
       nombres: values.nombres,
-      apellido_Materno: values.apellido_Materno,
-      apellido_Paterno: values.apellido_Paterno,
+      Apellido_Materno: values.apellido_Materno,
+      Apellido_Paterno: values.apellido_Paterno,
       cedula: values.cedula,
       especialidad: values.especialidad,
       grado: values.grado,
@@ -33,8 +33,8 @@ export const UpdateTeacher = async (values: ITeacher) => {
     data: {
       id: values.id,
       nombres: values.nombres,
-      apellido_Materno: values.apellido_Materno,
-      apellido_Paterno: values.apellido_Paterno,
+      Apellido_Materno: values.apellido_Materno,
+      Apellido_Paterno: values.apellido_Paterno,
       cedula: values.cedula,
       especialidad: values.especialidad,
       grado: values.grado,
