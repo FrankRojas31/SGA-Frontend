@@ -18,7 +18,6 @@ export const PostStudent = async (values: IEstudiante) => {
       apellido_Materno: values.apellido_Materno,
       apellido_Paterno: values.apellido_Paterno,
       matricula: values.matricula,
-      idPersona: values.idPersona,
       esBorrado: false,
     },
   })
@@ -34,7 +33,6 @@ export const UpdateStudent = async (values: IEstudiante) => {
       apellido_Materno: values.apellido_Materno,
       apellido_Paterno: values.apellido_Paterno,
       matricula: values.matricula,
-      idPersona: values.idPersona,
       esBorrado: false,
     },
   })

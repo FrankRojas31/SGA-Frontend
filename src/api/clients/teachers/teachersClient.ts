@@ -21,7 +21,6 @@ export const PostTeacher = async (values: ITeacher) => {
       especialidad: values.especialidad,
       grado: values.grado,
       noEmpleado: values.noEmpleado,
-      idPersona: values.idPersona,
       esBorrado: false,
     },
   })
@@ -40,7 +39,6 @@ export const UpdateTeacher = async (values: ITeacher) => {
       especialidad: values.especialidad,
       grado: values.grado,
       noEmpleado: values.noEmpleado,
-      idPersona: values.idPersona,
       esBorrado: false,
     },
   })

@@ -8,5 +8,4 @@ export interface ITeacher {
   especialidad: string
   grado: string
   noEmpleado: number
-  idPersona: number
 }

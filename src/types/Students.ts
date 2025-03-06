@@ -5,5 +5,4 @@ export interface IEstudiante {
   apellido_Materno: string
   apellido_Paterno: string
   matricula: number
-  idPersona: number
 }
