@@ -1,38 +1,41 @@
 import { ConnectionAPI } from '@/api/connectionAPI'
 import { GenericRequest } from '@/api/genericRequest'
-import type { IUnits } from '@/types/Units'
+import type { IPeriods } from '@/types/Periods'
 
 const url = ConnectionAPI()
-const base = url + '/Unidades'
+const base = url + '/Periodos'
 
-export const GetUnits = async () => {
+export const GetPeriods = async () => {
   return await GenericRequest({ url: base, method: 'GET' })
 }
 
-export const PostUnit = async (values: IUnits) => {
+export const PostPeriods = async (values: IPeriods) => {
   return await GenericRequest({
     url: base,
     method: 'POST',
     data: {
       nombre: values.nombre,
-      descripcion: values.descripcion,
       esBorrado: false,
+      fechaInicio: values.fechaInicio,
+      fechaFin: values.fechaFin,
     },
   })
 }
 
-export const UpdateUnit = async (values: IUnits) => {
+export const UpdatePeriod = async (values: IPeriods) => {
   return await GenericRequest({
     url: `${base}/${values.id}`,
     method: 'PUT',
     data: {
+      id: values.id,
       nombre: values.nombre,
-      descripcion: values.descripcion,
+      fechaInicio: values.fechaInicio,
+      fechaFin: values.fechaFin,
       esBorrado: false,
     },
   })
 }
 
-export const DeleteUnit = async (id: number) => {
+export const DeletePeriod = async (id: number) => {
   return await GenericRequest({ url: `${base}/${id}`, method: 'DELETE' })
 }

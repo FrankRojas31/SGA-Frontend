@@ -88,7 +88,6 @@ interface UnitCard {
   isEditing?: boolean;
 }
 
-// Estado para las unidades existentes
 const cards = ref<UnitCard[]>([
   {
     id: 1,

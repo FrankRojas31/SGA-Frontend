@@ -1,15 +1,15 @@
 import { ConnectionAPI } from '@/api/connectionAPI'
 import { GenericRequest } from '@/api/genericRequest'
-import type { IUnits } from '@/types/Units'
+import type { IGroups } from '@/types/Groups'
 
 const url = ConnectionAPI()
-const base = url + '/Unidades'
+const base = url + '/Grupo'
 
-export const GetUnits = async () => {
+export const GetGroups= async () => {
   return await GenericRequest({ url: base, method: 'GET' })
 }
 
-export const PostUnit = async (values: IUnits) => {
+export const PostGroup = async (values: IGroups) => {
   return await GenericRequest({
     url: base,
     method: 'POST',
@@ -21,7 +21,7 @@ export const PostUnit = async (values: IUnits) => {
   })
 }
 
-export const UpdateUnit = async (values: IUnits) => {
+export const UpdateGroup = async (values: IGroups) => {
   return await GenericRequest({
     url: `${base}/${values.id}`,
     method: 'PUT',
@@ -33,6 +33,6 @@ export const UpdateUnit = async (values: IUnits) => {
   })
 }
 
-export const DeleteUnit = async (id: number) => {
+export const DeleteGroup = async (id: number) => {
   return await GenericRequest({ url: `${base}/${id}`, method: 'DELETE' })
 }
