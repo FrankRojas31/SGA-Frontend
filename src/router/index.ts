@@ -6,13 +6,13 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: "/",
-      name: "landing",
+      path: '/',
+      name: 'landing',
       component: () => import('@/features/public/LandingFeat.vue'),
       meta: {
         menu: false,
-        title: 'landing'
-      }
+        title: 'landing',
+      },
     },
     {
       path: '/login',
@@ -38,17 +38,79 @@ const router = createRouter({
       component: () => import('@/features/dashboard/DashboardFeat.vue'),
       meta: {
         menu: true,
-        title: 'Dashboard'
-      }
+        title: 'Dashboard',
+        icon: 'pi pi-chart-pie',
+      },
     },
     {
       path: '/Periods',
-      name: 'Periodos',
-      component: () => import('@/features/Periods/PeriodsFeat.vue'),
-      meta:{
+      name: 'periodos',
+      component: () => import('@/features/periods/PeriodsFeat.vue'),
+      meta: {
         menu: true,
-        title: 'Periodos'
-      }
+        title: 'Periodos',
+        icon: 'pi pi-briefcase',
+      },
+    },
+    {
+      path: '/units',
+      name: 'Unidades',
+      component: () => import('@/features/units/UnitsFeat.vue'),
+      meta: {
+        menu: true,
+        title: 'Unidades',
+        icon: 'pi pi-server',
+      },
+    },
+    {
+      path: '/groups',
+      name: 'Grupos',
+      component: () => import('@/features/groups/GroupsFeat.vue'),
+      meta: {
+        menu: true,
+        title: 'Grupos',
+        icon: 'pi pi-sitemap',
+      },
+    },
+    {
+      path: '/subject',
+      name: 'Materias',
+      component: () => import('@/features/groups/GroupsFeat.vue'),
+      meta: {
+        menu: true,
+        title: 'Materias',
+        icon: 'pi pi-book',
+      },
+    },
+    {
+      path: '/students',
+      name: 'Alumnos',
+      component: () => import('@/features/students/StudentsFeat.vue'),
+      meta: {
+        menu: true,
+        title: 'Alumnos',
+        icon: 'pi pi-users',
+      },
+    },
+    {
+      path: '/teachers',
+      name: 'Profesores',
+      component: () => import('@/features/teachers/TeachersFeat.vue'),
+      meta: {
+        menu: true,
+        title: 'Profesores',
+        icon: 'pi pi-th-large',
+      },
+    },
+    {
+      path: '/records',
+      name: 'Boletas',
+      component: () => import('@/features/records/RecordsFeat.vue'),
+      meta: {
+        menu: true,
+        title: 'Boletas',
+        icon: 'pi pi-list',
+      },
     },
     {
       path: '/:patchMatch(.*)*',
@@ -62,28 +124,37 @@ const router = createRouter({
   ],
 })
 
-// router.beforeEach((to, from, next) => {
-//   const isAuthenticated = isAuth().value
-//   const publicRoutes = ['/', '/login', '/register', '/NotFound']
-//   const requiresAuth = !publicRoutes.includes(to.path)
-//   const isFirstLoad = !from.path || from.path === '/'
+router.beforeEach((to, from, next) => {
+  const verifyAuth = isAuth().value
+  const publicRoutes = ['/login', '/register', '/NotFound']
+  const requiresAuth = !publicRoutes.includes(to.path)
+  const isFirstLoad = !from.path || from.path === '/'
 
-//   if (isFirstLoad && to.path === '/') {
-//     if (isAuthenticated) {
-//       return next('/dashboard')
-//     }
-//     return next()
-//   }
+  if (isFirstLoad && to.path === '/') {
+    if (!verifyAuth) {
+      next('/login')
+      return
+    } else {
+      next('/dashboard')
+      return
+    }
+  }
 
-//   if (requiresAuth && !isAuthenticated) {
-//     return next(to.matched.length ? '/login' : '/NotFound')
-//   }
+  if (requiresAuth && !verifyAuth) {
+    if (to.matched.length) {
+      next('/NotFound')
+      return
+    } else {
+      next('/login')
+      return
+    }
+  }
 
-//   if (isAuthenticated && (to.name === 'login' || to.name === 'register')) {
-//     return next('/dashboard')
-//   }
+  if (verifyAuth && (to.name === 'login' || to.name === 'register')) {
+    next('/dashboard')
+    return
+  }
 
-//   next()
-// })
-
+  next()
+})
 export default router

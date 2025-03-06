@@ -2,8 +2,12 @@
   import AppLogo from '@/layouts/global/AppLogo.vue'
   import { useForm } from 'vee-validate'
   import { toTypedSchema } from '@vee-validate/yup'
+  import type { ILoginUser } from '@/types/Users'
+  import { useAuthStore } from '@/stores/AuthStore'
   import * as yup from 'yup'
+  import Swal from 'sweetalert2'
 
+  const auth = useAuthStore()
   const { errors, defineField, handleSubmit } = useForm({
     validationSchema: toTypedSchema(
       yup.object({
@@ -23,8 +27,18 @@
     validateOnModelUpdate: true,
   })
 
-  const onSubmit = handleSubmit((values) => {
-    
+  const onSubmit = handleSubmit(async (values: ILoginUser) => {
+    if (Object.keys(errors.value).length === 0) {
+      await auth.Login(values)
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Rellena todos los valores',
+        text: 'Todos los campos son requeridos',
+        timer: 2000,
+        timerProgressBar: true,
+      })
+    }
   })
 </script>
 

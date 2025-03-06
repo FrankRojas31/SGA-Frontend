@@ -30,13 +30,17 @@ declare module 'vue' {
     Panel: typeof import('primevue/panel')['default']
     PanelComponent: typeof import('./src/components/dashboard/PanelComponent.vue')['default']
     ProgressBar: typeof import('primevue/progressbar')['default']
+    RecordsComponent: typeof import('./src/components/records/RecordsComponent.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Select: typeof import('primevue/select')['default']
     Slider: typeof import('primevue/slider')['default']
     TableComponent: typeof import('./src/components/dashboard/TableComponent.vue')['default']
+    TableGroupComponent: typeof import('./src/components/groups/TableGroupComponent.vue')['default']
     TableQualifications: typeof import('./src/components/qualifications/TableQualifications.vue')['default']
+    TableStudentComponent: typeof import('./src/components/students/TableStudentComponent.vue')['default']
     Tag: typeof import('primevue/tag')['default']
+    ToggleButton: typeof import('primevue/togglebutton')['default']
     TopbarWidget: typeof import('./src/components/ui/landing/TopbarWidget.vue')['default']
   }
   export interface ComponentCustomProperties {

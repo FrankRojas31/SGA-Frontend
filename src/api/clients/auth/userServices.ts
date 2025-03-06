@@ -1,26 +1,31 @@
 import { ConnectionAPI } from '@/api/connectionAPI'
 import { GenericRequest } from '@/api/genericRequest'
+import type { ILoginUser, IUser } from '@/types/Users'
 
 const urlBase = ConnectionAPI()
 
-export const LoginAccount = async (email: string, password: string) => {
+export const LoginAccount = async (values: ILoginUser) => {
   return await GenericRequest({
-    url: `${urlBase}users/login`,
+    url: `${urlBase}/Account/login`,
     method: 'POST',
     data: {
-      email: email,
-      password: password,
+      email: values.email,
+      password: values.password,
     },
   })
 }
 
-export const RegisterAccount = async (email: string, password: string) => {
+export const RegisterAccount = async (values: IUser) => {
   return await GenericRequest({
-    url: `${urlBase}users/register`,
+    url: `${urlBase}/Account/register`,
     method: 'POST',
     data: {
-      email: email,
-      password: password,
+      name: values.name,
+      email: values.email,
+      password: values.password,
+      confirmPassword: values.confirmPassword,
+      estatusUsuario: values.estatusUsuario,
+      rol: values.rol,
     },
   })
 }

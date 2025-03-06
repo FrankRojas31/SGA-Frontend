@@ -1,46 +1,68 @@
 <script lang="ts" setup>
-import AppLogo from '@/layouts/global/AppLogo.vue'
-import { toTypedSchema } from '@vee-validate/yup'
-import { useForm } from 'vee-validate'
-import { RouterLink } from 'vue-router'
-import * as yup from 'yup'
+  import AppLogo from '@/layouts/global/AppLogo.vue'
+  import { useAuthStore } from '@/stores/AuthStore'
+  import type { IUserSend } from '@/types/Users'
+  import { toTypedSchema } from '@vee-validate/yup'
+  import Swal from 'sweetalert2'
+  import { useForm } from 'vee-validate'
+  import { RouterLink } from 'vue-router'
+  import * as yup from 'yup'
 
-const { values, errors, defineField, handleSubmit } = useForm({
-  validationSchema: toTypedSchema(
-    yup.object({
-      email: yup.string().required('El correo es requerido').email('Correo Incorrecto'),
-      password: yup
-        .string()
-        .required('La contraseña es requerida')
-        .min(8, 'La contraseña debe tener al menos 8 caracteres'),
-      duoPassword: yup
-        .string()
-        .required('Debes confirmar la contraseña')
-        .oneOf([yup.ref('password')], 'Las contraseñas deben coincidir')
-    })
-  ),
-})
+  const auth = useAuthStore()
+  const { values, errors, defineField, handleSubmit } = useForm({
+    validationSchema: toTypedSchema(
+      yup.object({
+        nombre: yup.string().required('El nombre es requerido').min(2, 'Mínimo 2 caracteres'),
+        email: yup.string().required('El correo es requerido').email('Correo Incorrecto'),
+        password: yup
+          .string()
+          .required('La contraseña es requerida')
+          .min(8, 'Debe tener al menos 8 caracteres')
+          .matches(/[a-z]/, 'Debe contener al menos una letra minúscula')
+          .matches(/[A-Z]/, 'Debe contener al menos una letra mayúscula')
+          .matches(/[0-9]/, 'Debe contener al menos un número')
+          .matches(/[\W_]/, 'Debe contener al menos un carácter especial')
+          .notOneOf(
+            ['123456', 'password', '123456789', 'qwerty', 'abc123', 'password1'],
+            'La contraseña es demasiado común'
+          ),
+        duoPassword: yup
+          .string()
+          .required('Debes confirmar la contraseña')
+          .oneOf([yup.ref('password')], 'Las contraseñas deben coincidir'),
+      })
+    ),
+  })
 
-const [email, emailAttrs] = defineField('email', {
-  validateOnModelUpdate: true,
-})
+  const [nombre, nombreAttrs] = defineField('nombre', {
+    validateOnModelUpdate: true,
+  })
 
-const [password, passwordAttrs] = defineField('password', {
-  validateOnModelUpdate: true,
-})
+  const [email, emailAttrs] = defineField('email', {
+    validateOnModelUpdate: true,
+  })
 
-const [duoPassword, duoPasswordAttrs] = defineField('duoPassword', {
-  validateOnModelUpdate: true,
-})
+  const [password, passwordAttrs] = defineField('password', {
+    validateOnModelUpdate: true,
+  })
 
-const RegisterAccount = handleSubmit((values) => {
-  if (Object.keys(errors.value).length === 0) {
-    console.log('Form is valid, proceeding with registration:', values)
-    // auth.Register(values.email, values.password)
-  } else {
-    console.error('Form has errors:', errors.value)
-  }
-})
+  const [duoPassword, duoPasswordAttrs] = defineField('duoPassword', {
+    validateOnModelUpdate: true,
+  })
+
+  const RegisterAccount = handleSubmit(async (values: IUserSend) => {
+    if (Object.keys(errors.value).length === 0) {
+      await auth.Register(values)
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Rellena todos los valores',
+        text: 'Todos los campos son requeridos',
+        timer: 2000,
+        timerProgressBar: true,
+      })
+    }
+  })
 </script>
 
 <template>
@@ -50,14 +72,56 @@ const RegisterAccount = handleSubmit((values) => {
     >
       <div class="absolute bg-black opacity-80 inset-0 z-0"></div>
       <div class="relative sm:max-w-sm w-full">
-        <div class="card bg-gray-500 shadow-lg w-full h-full rounded-3xl absolute transform -rotate-7"></div>
-        <div class="card bg-gray-400 shadow-lg w-full h-full rounded-3xl absolute transform rotate-6"></div>
+        <div
+          class="card bg-gray-500 shadow-lg w-full h-full rounded-3xl absolute transform -rotate-7"
+        ></div>
+        <div
+          class="card bg-gray-400 shadow-lg w-full h-full rounded-3xl absolute transform rotate-6"
+        ></div>
         <div class="relative w-full rounded-3xl px-6 py-4 bg-gray-100 shadow-md">
           <AppLogo :route="false" />
           <label class="block mt-2 text-md text-gray-800 text-center font-semibold uppercase">
             Registrar Cuenta
           </label>
           <form class="mt-2" @submit.prevent="RegisterAccount">
+            <!-- Campo Nombre -->
+            <label class="block mb-2 text-sm font-medium">Nombre</label>
+            <div
+              class="relative"
+              v-bind="nombreAttrs"
+              :class="{ 'mb-4': !errors.nombre, 'mb-1': errors.nombre }"
+            >
+              <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <svg
+                  class="w-5 h-5"
+                  :class="{ 'text-gray-400': !errors.nombre, 'text-red-400': errors.nombre }"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M10 10a3 3 0 100-6 3 3 0 000 6zm-7 4a7 7 0 1114 0H3z" />
+                </svg>
+              </div>
+              <input
+                type="text"
+                v-model="nombre"
+                v-bind="nombreAttrs"
+                :class="{
+                  'border text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5': true,
+                  'border-gray-300': !errors.nombre,
+                  'border-red-500': errors.nombre,
+                }"
+                placeholder="Tu nombre"
+                required
+              />
+            </div>
+            <div v-show="errors.nombre" class="mb-2">
+              <span v-if="errors.nombre" class="font-sans text-red-400 text-sm">
+                {{ errors.nombre }}
+              </span>
+            </div>
+
+            <!-- Campo Correo Electrónico -->
             <label class="block mb-2 text-sm font-medium">Correo Electrónico</label>
             <div
               class="relative"
@@ -72,7 +136,9 @@ const RegisterAccount = handleSubmit((values) => {
                   viewBox="0 0 20 20"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
+                  <path
+                    d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"
+                  ></path>
                   <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
                 </svg>
               </div>
@@ -95,6 +161,7 @@ const RegisterAccount = handleSubmit((values) => {
               </span>
             </div>
 
+            <!-- Campo Contraseña -->
             <label class="block mb-2 text-sm font-medium">Contraseña</label>
             <div
               class="relative"
@@ -133,6 +200,7 @@ const RegisterAccount = handleSubmit((values) => {
               <span v-if="errors.password" class="text-red-400 text-sm">{{ errors.password }}</span>
             </div>
 
+            <!-- Campo Repite Contraseña -->
             <label class="block mb-2 text-sm font-medium">Repite Contraseña</label>
             <div
               class="relative"
@@ -145,7 +213,10 @@ const RegisterAccount = handleSubmit((values) => {
                   viewBox="0 0 24 24"
                   fill="currentColor"
                   class="size-5"
-                  :class="{ 'text-gray-400': !errors.duoPassword, 'text-red-400': errors.duoPassword }"
+                  :class="{
+                    'text-gray-400': !errors.duoPassword,
+                    'text-red-400': errors.duoPassword,
+                  }"
                 >
                   <path
                     fill-rule="evenodd"
@@ -168,9 +239,12 @@ const RegisterAccount = handleSubmit((values) => {
               />
             </div>
             <div v-show="errors.duoPassword" class="mb-4">
-              <span v-if="errors.duoPassword" class="text-red-400 text-sm">{{ errors.duoPassword }}</span>
+              <span v-if="errors.duoPassword" class="text-red-400 text-sm">
+                {{ errors.duoPassword }}
+              </span>
             </div>
 
+            <!-- Botón y enlace -->
             <div class="mt-6">
               <button
                 class="bg-gray-500 w-full py-3 rounded-md text-white shadow-xl transition duration-300 ease-in-out transform hover:-translate-x hover:scale-101 hover:bg-gray-600"

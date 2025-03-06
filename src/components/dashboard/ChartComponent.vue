@@ -1,7 +1,7 @@
 
 <template>
     <div class="card">
-        <Chart type="line" :data="chartData" :options="chartOptions" class="h-[320px]" />
+        <Chart type="line" :data="chartData" :options="chartOptions" class="h-[320px] w-[500px]" />
     </div>
 </template>
 

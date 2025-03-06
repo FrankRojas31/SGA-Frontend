@@ -1,8 +1,9 @@
 <template>
-<Panel header="Header">
-    <p class="">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-        consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+  <Panel header="¡Nota Importante!" class="">
+    <p>
+        Recuerda registrar y guardar las calificaciones de tus estudiantes en tiempo y forma para evitar inconvenientes al final del semestre. La puntualidad en el proceso de calificación no solo garantiza un seguimiento adecuado del rendimiento de los alumnos, sino que también permite a los estudiantes recibir retroalimentación oportuna para su mejora continua.
+        Es importante que te tomes el tiempo necesario para actualizar las calificaciones de manera precisa, ya que esto afecta directamente el progreso académico de cada estudiante. Además, mantener una comunicación constante con ellos sobre su desempeño les permite tomar decisiones informadas sobre su aprendizaje y ajustar sus esfuerzos si es necesario.
+        No olvides que el trabajo en equipo con otros profesores y administrativos también es esencial para asegurar que todo el proceso educativo sea fluido. La organización y el seguimiento adecuado no solo mejoran la experiencia educativa, sino que también fortalecen la relación con los estudiantes, quienes agradecen recibir sus resultados a tiempo.
     </p>
-</Panel>
+  </Panel>
 </template>

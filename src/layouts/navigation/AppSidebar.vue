@@ -3,13 +3,19 @@ import { useSidebarStore } from '@/stores/SidebarStore';
 import { computed, onMounted, ref } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 import AppLogo from "@/layouts/global/AppLogo.vue";
+import { useAuthStore } from '@/stores/AuthStore'
 
+const auth = useAuthStore();
 const date = ref('');
 const routesAll = useRouter();
 const sidebar = useSidebarStore();
 const routesWithFilter = computed(() => {
-  return routesAll.options.routes.filter((x) => x.meta!.menu && x.name);
-})
+  return routesAll.options.routes.filter((x) => x.meta!.menu && x.name)
+    .map(route => ({
+      ...route,
+      icon: route.meta?.icon || 'pi pi-circle'
+    }));
+});
 
 const showSidebar = computed(() => {
   return sidebar.sidebar.open;
@@ -41,14 +47,15 @@ onMounted(() => {
       <nav class="mt-4">
         <RouterLink v-for="ruta in routesWithFilter" :key="ruta.path" :to="ruta.path"
           :class="{ 'bg-gray-700': $route.path === ruta.path }"
-          class="mt-1 text-center rounded-xs block px-4 py-3 hover:bg-gray-400">
+          class="mt-1 rounded-xs block px-4 py-3 hover:bg-gray-400">
+          <i :class="ruta.icon" class="mr-2"></i>
           {{ ruta.meta?.title }}
         </RouterLink>
-        <!-- <div class="mt-1 text-center rounded-xs block px-4 py-3 hover:bg-gray-400">
+        <div class="mt-1 text-center rounded-xs block px-4 py-3 hover:bg-gray-400">
         <button @click="auth.Logout">
           Cerrar Sesion
         </button>
-      </div> -->
+      </div>
       </nav>
     </div>
 
