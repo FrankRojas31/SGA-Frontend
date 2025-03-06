@@ -22,21 +22,21 @@
         <Column field="fechaInicio" header="Fecha Inicio" style="min-width: 120px"></Column>
         <Column field="fechaFin" header="Fecha Fin" style="min-width: 120px"></Column>
         <Column header="Acciones" style="min-width: 150px">
-          <template #body="{ index }">
+          <template #body="{ data }">
             <div class="flex gap-2">
               <Button
                 label="Editar"
                 severity="secondary"
                 outlined
                 class="text-xs py-1"
-                @click="openEditModal(index)"
+                @click="openEditModal(data)"
               />
               <Button
                 label="Eliminar"
                 severity="danger"
                 outlined
                 class="text-xs py-1"
-                @click="confirmDelete(index)"
+                @click="confirmDelete(data)"
               />
             </div>
           </template>
@@ -47,45 +47,93 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import Button from "primevue/button";
 import Swal from "sweetalert2";
+import { GetPeriods, PostPeriods, UpdatePeriod, DeletePeriod } from "@/api/clients/periods/periodsClient";
+import type { IPeriods } from "@/types/Periods";
 
-// Interfaz para los periodos
-interface Period {
-  id: number;
-  nombre: string;
-  fechaInicio: string; // Formato: YYYY-MM-DD
-  fechaFin: string; // Formato: YYYY-MM-DD
-}
 
-// Estado para los periodos
-const periods = ref<Period[]>([
-  {
-    id: 1,
-    nombre: "Semestre 1 - 2025",
-    fechaInicio: "2025-01-15",
-    fechaFin: "2025-06-15",
-  },
-  {
-    id: 2,
-    nombre: "Semestre 2 - 2025",
-    fechaInicio: "2025-07-01",
-    fechaFin: "2025-12-15",
-  },
-  {
-    id: 3,
-    nombre: "Verano 2025",
-    fechaInicio: "2025-06-20",
-    fechaFin: "2025-08-10",
-  },
-]);
-
+const periods = ref<IPeriods[]>([]);
 const loading = ref(false);
 
-// Abrir modal para agregar un nuevo periodo
+
+const loadPeriods = async () => {
+  try {
+    loading.value = true;
+    const response = await GetPeriods();
+    periods.value = response.data.data;
+  } catch (error) {
+    await Swal.fire("Error", "No se pudieron cargar los periodos.", "error");
+    console.error("Error al cargar periodos:", error);
+  } finally {
+    loading.value = false;
+  }
+};
+
+const createPeriod = async (period: Omit<IPeriods, "id">) => {
+  try {
+    loading.value = true;
+    await PostPeriods(period);
+    await Swal.fire("Éxito", "Periodo creado correctamente.", "success");
+    await loadPeriods();
+  } catch (error) {
+    await Swal.fire("Error", "No se pudo crear el periodo.", "error");
+    console.error("Error al crear periodo:", error);
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Actualizar un periodo
+const updatePeriod = async (period: IPeriods) => {
+  try {
+    loading.value = true;
+    await UpdatePeriod(period);
+    await Swal.fire("Éxito", "Periodo actualizado correctamente.", "success");
+    await loadPeriods();
+  } catch (error) {
+    await Swal.fire("Error", "No se pudo actualizar el periodo.", "error");
+    console.error("Error al actualizar periodo:", error);
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Eliminar un periodo
+const deletePeriod = async (id: number) => {
+  try {
+    loading.value = true;
+    await DeletePeriod(id);
+    await Swal.fire("Éxito", "Periodo eliminado correctamente.", "success");
+    await loadPeriods();
+  } catch (error) {
+    await Swal.fire("Error", "No se pudo eliminar el periodo.", "error");
+    console.error("Error al eliminar periodo:", error);
+  } finally {
+    loading.value = false;
+  }
+};
+
+const confirmDelete = async (period: IPeriods) => {
+  const result = await Swal.fire({
+    icon: "warning",
+    title: "¿Estás seguro?",
+    text: `Eliminarás "${period.nombre}" (${period.fechaInicio} - ${period.fechaFin}). Esta acción no se puede deshacer.`,
+    showCancelButton: true,
+    confirmButtonText: "Sí, eliminar",
+    cancelButtonText: "Cancelar",
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+  });
+
+  if (result.isConfirmed) {
+    await deletePeriod(period.id);
+  }
+};
+
 const openCreateModal = async () => {
   const { value: formValues } = await Swal.fire({
     title: "Agregar Nuevo Periodo",
@@ -104,7 +152,7 @@ const openCreateModal = async () => {
       const fechaFin = (document.getElementById("swal-fechaFin") as HTMLInputElement).value;
 
       if (!nombre || !fechaInicio || !fechaFin) {
-        Swal.showValidationMessage("Por favor, completa todos los campos obligatorios.");
+        Swal.showValidationMessage("Por favor, completa todos los campos.");
         return false;
       }
       if (new Date(fechaInicio) >= new Date(fechaFin)) {
@@ -120,43 +168,8 @@ const openCreateModal = async () => {
   }
 };
 
-// Crear un nuevo periodo
-const createPeriod = async (period: Omit<Period, "id">) => {
-  try {
-    loading.value = true;
-    // Simulación de llamada a la API
-    // const response = await fetch('URL_API/periods', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(period),
-    // });
-    // const createdPeriod = await response.json();
 
-    const createdPeriod = { ...period, id: periods.value.length + 1 };
-    periods.value.push(createdPeriod);
-
-    await Swal.fire({
-      icon: "success",
-      title: "¡Periodo creado!",
-      text: `${createdPeriod.nombre} ha sido agregado exitosamente.`,
-      timer: 1500,
-      showConfirmButton: false,
-    });
-  } catch (error) {
-    await Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: "No se pudo crear el periodo. Intenta de nuevo.",
-    });
-    console.error("Error al crear periodo:", error);
-  } finally {
-    loading.value = false;
-  }
-};
-
-// Abrir modal para editar un periodo
-const openEditModal = async (index: number) => {
-  const period = periods.value[index];
+const openEditModal = async (period: IPeriods) => {
   const { value: formValues } = await Swal.fire({
     title: "Editar Periodo",
     html: `
@@ -174,143 +187,22 @@ const openEditModal = async (index: number) => {
       const fechaFin = (document.getElementById("swal-fechaFin") as HTMLInputElement).value;
 
       if (!nombre || !fechaInicio || !fechaFin) {
-        Swal.showValidationMessage("Por favor, completa todos los campos obligatorios.");
+        Swal.showValidationMessage("Por favor, completa todos los campos.");
         return false;
       }
       if (new Date(fechaInicio) >= new Date(fechaFin)) {
         Swal.showValidationMessage("La Fecha Inicio debe ser anterior a la Fecha Fin.");
         return false;
       }
-      return { nombre, fechaInicio, fechaFin };
+      return { id: period.id, nombre, fechaInicio, fechaFin };
     },
   });
 
   if (formValues) {
-    await updatePeriod(index, { ...formValues, id: period.id });
+    await updatePeriod(formValues);
   }
 };
 
-// Actualizar un periodo
-const updatePeriod = async (index: number, updatedPeriod: Period) => {
-  try {
-    loading.value = true;
-    // Simulación de llamada a la API
-    // const response = await fetch(`URL_API/periods/${updatedPeriod.id}`, {
-    //   method: 'PUT',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(updatedPeriod),
-    // });
-    // const updated = await response.json();
 
-    periods.value[index] = updatedPeriod;
-
-    await Swal.fire({
-      icon: "success",
-      title: "¡Periodo actualizado!",
-      text: `${updatedPeriod.nombre} ha sido actualizado exitosamente.`,
-      timer: 1500,
-      showConfirmButton: false,
-    });
-  } catch (error) {
-    await Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: "No se pudo actualizar el periodo. Intenta de nuevo.",
-    });
-    console.error("Error al actualizar periodo:", error);
-  } finally {
-    loading.value = false;
-  }
-};
-
-// Confirmar eliminación de un periodo
-const confirmDelete = async (index: number) => {
-  const period = periods.value[index];
-  const result = await Swal.fire({
-    icon: "warning",
-    title: "¿Estás seguro?",
-    text: `Eliminarás "${period.nombre}" (${period.fechaInicio} - ${period.fechaFin}). Esta acción no se puede deshacer.`,
-    showCancelButton: true,
-    confirmButtonText: "Sí, eliminar",
-    cancelButtonText: "Cancelar",
-    confirmButtonColor: "#d33",
-    cancelButtonColor: "#3085d6",
-  });
-
-  if (result.isConfirmed) {
-    await deletePeriod(index);
-  }
-};
-
-// Eliminar un periodo
-const deletePeriod = async (index: number) => {
-  const period = periods.value[index];
-  try {
-    loading.value = true;
-    // Simulación de llamada a la API
-    // await fetch(`URL_API/periods/${period.id}`, {
-    //   method: 'DELETE',
-    // });
-
-    periods.value.splice(index, 1);
-
-    await Swal.fire({
-      icon: "success",
-      title: "¡Periodo eliminado!",
-      text: `${period.nombre} ha sido eliminado exitosamente.`,
-      timer: 1500,
-      showConfirmButton: false,
-    });
-  } catch (error) {
-    await Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: "No se pudo eliminar el periodo. Intenta de nuevo.",
-    });
-    console.error("Error al eliminar periodo:", error);
-  } finally {
-    loading.value = false;
-  }
-};
-
-// Cargar periodos iniciales (Leer)
-const loadPeriods = async () => {
-  try {
-    loading.value = true;
-    // Simulación de llamada a la API
-    // const response = await fetch('URL_API/periods');
-    // const data = await response.json();
-    // periods.value = data;
-
-    console.log("Periodos cargados:", periods.value);
-  } catch (error) {
-    await Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: "No se pudieron cargar los periodos.",
-    });
-    console.error("Error al cargar periodos:", error);
-  } finally {
-    loading.value = false;
-  }
-};
-
-// Cargar datos al montar el componente
-loadPeriods();
+onMounted(loadPeriods);
 </script>
-
-<style scoped>
-.shadow-md {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-/* Ajustes para pantallas pequeñas */
-@media (max-width: 640px) {
-  .p-4 {
-    padding: 1rem;
-  }
-  .text-xs {
-    font-size: 0.65rem;
-  }
-}
-</style>

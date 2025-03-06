@@ -57,7 +57,7 @@ import { ref, onMounted } from "vue";
 import Swal from "sweetalert2";
 import Card from "primevue/card";
 import Button from "primevue/button";
-import { GetUnits, PostUnits, UpdateUnits, DeleteUnit } from "@/api/clients/units/unitsClient";
+import { GetUnits, PostUnit, UpdateUnit, DeleteUnit } from "@/api/clients/units/unitsClient";
 
 
 const cards = ref([]);
@@ -105,10 +105,10 @@ const openCreateModal = async () => {
   }
 };
 
-// Crear una nueva unidad
+
 const createUnit = async (unit) => {
   try {
-    const newUnit = await PostUnits(unit);
+    const newUnit = await PostUnit(unit);
     loadUnits()
     Swal.fire("¡Unidad creada!", `${newUnit.nombre} ha sido agregada.`, "success");
   } catch (error) {
@@ -116,17 +116,16 @@ const createUnit = async (unit) => {
   }
 };
 
-// Habilitar edición
+
 const editCard = (index) => {
   cards.value[index].isEditing = true;
 };
 
-// Guardar cambios en una unidad
 const updateCard = async (index) => {
   const unitToUpdate = cards.value[index];
 
   try {
-    await UpdateUnits(unitToUpdate);
+    await UpdateUnit(unitToUpdate);
     unitToUpdate.isEditing = false;
 
     Swal.fire("¡Unidad actualizada!", "Los cambios han sido guardados.", "success");
@@ -165,6 +164,5 @@ const deleteCard = async (index) => {
   }
 };
 
-// Cargar datos al montar el componente
 onMounted(loadUnits);
 </script>

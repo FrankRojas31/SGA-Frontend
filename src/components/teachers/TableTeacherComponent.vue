@@ -55,52 +55,30 @@ import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import Button from "primevue/button";
 import Swal from "sweetalert2";
+import { GetTeachers, PostTeacher, UpdateTeacher, DeleteTeacher } from '@/api/clients/teachers/teachersClient';
+import type { ITeacher } from "@/types/Teachers";
 
-// Interfaz para los profesores
-interface Teacher {
-  id: number;
-  nombre: string;
-  apellidoPaterno: string;
-  apellidoMaterno: string;
-  especialidad: string;
-  grado: string;
-  cedula: string;
-}
-
-// Estado para los profesores
-const teachers = ref<Teacher[]>([
-  {
-    id: 1,
-    nombre: "Laura",
-    apellidoPaterno: "Hernández",
-    apellidoMaterno: "Díaz",
-    especialidad: "Matemáticas",
-    grado: "Maestría",
-    cedula: "M123456",
-  },
-  {
-    id: 2,
-    nombre: "Pedro",
-    apellidoPaterno: "Martínez",
-    apellidoMaterno: "Soto",
-    especialidad: "Historia",
-    grado: "Licenciatura",
-    cedula: "H789012",
-  },
-  {
-    id: 3,
-    nombre: "Sofía",
-    apellidoPaterno: "Gómez",
-    apellidoMaterno: "Reyes",
-    especialidad: "Biología",
-    grado: "Doctorado",
-    cedula: "B345678",
-  },
-]);
+const teachers = ref<ITeacher[]>([]);
 
 const loading = ref(false);
 
-// Abrir modal para agregar un nuevo profesor
+const loadTeachers = async () => {
+  try {
+    loading.value = true;
+    const response = await GetTeachers();
+    teachers.value = response.data.data;
+  } catch (error) {
+    await Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "No se pudieron cargar los profesores.",
+    });
+    console.error("Error al cargar profesores:", error);
+  } finally {
+    loading.value = false;
+  }
+};
+
 const openCreateModal = async () => {
   const { value: formValues } = await Swal.fire({
     title: "Agregar Nuevo Profesor",
@@ -137,25 +115,16 @@ const openCreateModal = async () => {
   }
 };
 
-// Crear un nuevo profesor
-const createTeacher = async (teacher: Omit<Teacher, "id">) => {
+const createTeacher = async (teacher: Omit<ITeacher, "id">) => {
   try {
     loading.value = true;
-    // Simulación de llamada a la API
-    // const response = await fetch('URL_API/teachers', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(teacher),
-    // });
-    // const createdTeacher = await response.json();
-
-    const createdTeacher = { ...teacher, id: teachers.value.length + 1 };
-    teachers.value.push(createdTeacher);
+    const response = await PostTeacher(teacher);
+    teachers.value.push(response.data.data);
 
     await Swal.fire({
       icon: "success",
       title: "¡Profesor creado!",
-      text: `${createdTeacher.nombre} ${createdTeacher.apellidoPaterno} ha sido agregado exitosamente.`,
+      text: `${response.data.nombre} ${response.data.apellidoPaterno} ha sido agregado exitosamente.`,
       timer: 1500,
       showConfirmButton: false,
     });
@@ -171,7 +140,6 @@ const createTeacher = async (teacher: Omit<Teacher, "id">) => {
   }
 };
 
-// Abrir modal para editar un profesor
 const openEditModal = async (index: number) => {
   const teacher = teachers.value[index];
   const { value: formValues } = await Swal.fire({
@@ -209,24 +177,17 @@ const openEditModal = async (index: number) => {
   }
 };
 
-// Actualizar un profesor
-const updateTeacher = async (index: number, updatedTeacher: Teacher) => {
+
+const updateTeacher = async (index: number, updatedTeacher: ITeacher) => {
   try {
     loading.value = true;
-    // Simulación de llamada a la API
-    // const response = await fetch(`URL_API/teachers/${updatedTeacher.id}`, {
-    //   method: 'PUT',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(updatedTeacher),
-    // });
-    // const updated = await response.json();
-
-    teachers.value[index] = updatedTeacher;
+    const response = await UpdateTeacher(updatedTeacher);
+    teachers.value[index] = response.data.data;
 
     await Swal.fire({
       icon: "success",
       title: "¡Profesor actualizado!",
-      text: `${updatedTeacher.nombre} ${updatedTeacher.apellidoPaterno} ha sido actualizado exitosamente.`,
+      text: `${response.data.nombre} ${response.data.apellidoPaterno} ha sido actualizado exitosamente.`,
       timer: 1500,
       showConfirmButton: false,
     });
@@ -242,18 +203,16 @@ const updateTeacher = async (index: number, updatedTeacher: Teacher) => {
   }
 };
 
-// Confirmar eliminación de un profesor
+
 const confirmDelete = async (index: number) => {
   const teacher = teachers.value[index];
   const result = await Swal.fire({
     icon: "warning",
     title: "¿Estás seguro?",
-    text: `Eliminarás a "${teacher.nombre} ${teacher.apellidoPaterno} ${teacher.apellidoMaterno}". Esta acción no se puede deshacer.`,
+    text: `Eliminarás a ${teacher.nombre} ${teacher.apellidoPaterno}. Esta acción no se puede deshacer.`,
     showCancelButton: true,
-    confirmButtonText: "Sí, eliminar",
+    confirmButtonText: "Eliminar",
     cancelButtonText: "Cancelar",
-    confirmButtonColor: "#d33",
-    cancelButtonColor: "#3085d6",
   });
 
   if (result.isConfirmed) {
@@ -261,16 +220,12 @@ const confirmDelete = async (index: number) => {
   }
 };
 
-// Eliminar un profesor
+
 const deleteTeacher = async (index: number) => {
   const teacher = teachers.value[index];
   try {
     loading.value = true;
-    // Simulación de llamada a la API
-    // await fetch(`URL_API/teachers/${teacher.id}`, {
-    //   method: 'DELETE',
-    // });
-
+    await DeleteTeacher(teacher.id);
     teachers.value.splice(index, 1);
 
     await Swal.fire({
@@ -292,44 +247,6 @@ const deleteTeacher = async (index: number) => {
   }
 };
 
-// Cargar profesores iniciales (Leer)
-const loadTeachers = async () => {
-  try {
-    loading.value = true;
-    // Simulación de llamada a la API
-    // const response = await fetch('URL_API/teachers');
-    // const data = await response.json();
-    // teachers.value = data;
 
-    console.log("Profesores cargados:", teachers.value);
-  } catch (error) {
-    await Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: "No se pudieron cargar los profesores.",
-    });
-    console.error("Error al cargar profesores:", error);
-  } finally {
-    loading.value = false;
-  }
-};
-
-// Cargar datos al montar el componente
 loadTeachers();
 </script>
-
-<style scoped>
-.shadow-md {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-/* Ajustes para pantallas pequeñas */
-@media (max-width: 640px) {
-  .p-4 {
-    padding: 1rem;
-  }
-  .text-xs {
-    font-size: 0.65rem;
-  }
-}
-</style>

@@ -19,9 +19,9 @@
         :loading="loading"
       >
         <Column field="nombre" header="Nombre" style="min-width: 150px" frozen class="font-bold"></Column>
-        <Column field="creditos" header="Créditos" style="min-width: 100px"></Column>
-        <Column field="horasSemanales" header="Horas Semanales" style="min-width: 120px"></Column>
-        <Column field="clave" header="Clave" style="min-width: 120px"></Column>
+        <Column field="descripcion" header="Descripción" style="min-width: 100px"></Column>
+        <!-- <Column field="horasSemanales" header="Horas Semanales" style="min-width: 120px"></Column>
+        <Column field="clave" header="Clave" style="min-width: 120px"></Column> -->
         <Column header="Acciones" style="min-width: 150px">
           <template #body="{ index }">
             <div class="flex gap-2">
@@ -53,52 +53,41 @@ import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import Button from "primevue/button";
 import Swal from "sweetalert2";
+import { GetSubject, PostSubject, UpdateSubject, DeleteSubject } from '@/api/clients/subjects/subjectClient'
+import type { ISubject } from '@/types/Subjects'
 
-// Interfaz para las materias
-interface Subject {
-  id: number;
-  nombre: string;
-  creditos: number;
-  horasSemanales: number;
-  clave: string;
-}
-
-// Estado para las materias
-const subjects = ref<Subject[]>([
-  {
-    id: 1,
-    nombre: "Álgebra Lineal",
-    creditos: 6,
-    horasSemanales: 4,
-    clave: "MAT101",
-  },
-  {
-    id: 2,
-    nombre: "Historia Universal",
-    creditos: 4,
-    horasSemanales: 3,
-    clave: "HIS201",
-  },
-  {
-    id: 3,
-    nombre: "Biología Molecular",
-    creditos: 8,
-    horasSemanales: 5,
-    clave: "BIO301",
-  },
-]);
-
+const subjects = ref<ISubject[]>([]);
 const loading = ref(false);
 
-// Abrir modal para agregar una nueva materia
+const loadSubjects = async () => {
+  try {
+    loading.value = true;
+    const response = await GetSubject();
+    subjects.value = response.data.data;
+  } catch (error) {
+    await Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "No se pudieron cargar las materias.",
+    });
+    console.error("Error al cargar materias:", error);
+  } finally {
+    loading.value = false;
+  }
+};
+
 const openCreateModal = async () => {
   const { value: formValues } = await Swal.fire({
     title: "Agregar Nueva Materia",
     html: `
-      <input id="swal-nombre" class="swal2-input" placeholder="Nombre" />
-      <input id="swal-creditos" class="swal2-input" type="number" placeholder="Créditos" />
-      <input id="swal-horasSemanales" class="swal2-input" type="number" placeholder="Horas Semanales" />
-      <input id="swal-clave" class="swal2-input" placeholder="Clave" />
+      <div>
+        <label for="swal-nombre">Nombre:</label>
+        <input type="text" id="swal-nombre" class="swal2-input" placeholder="Nombre de la materia" required/>
+      </div>
+      <div class="mt-3">
+        <label for="swal-descripcion">Descripción:</label>
+        <textarea id="swal-descripcion" class="swal2-textarea" placeholder="Descripción de la materia" required></textarea>
+      </div>
     `,
     focusConfirm: false,
     showCancelButton: true,
@@ -106,19 +95,12 @@ const openCreateModal = async () => {
     cancelButtonText: "Cancelar",
     preConfirm: () => {
       const nombre = (document.getElementById("swal-nombre") as HTMLInputElement).value;
-      const creditos = Number((document.getElementById("swal-creditos") as HTMLInputElement).value);
-      const horasSemanales = Number((document.getElementById("swal-horasSemanales") as HTMLInputElement).value);
-      const clave = (document.getElementById("swal-clave") as HTMLInputElement).value;
-
-      if (!nombre || !creditos || !horasSemanales || !clave) {
-        Swal.showValidationMessage("Por favor, completa todos los campos obligatorios.");
+      const descripcion = (document.getElementById("swal-descripcion") as HTMLTextAreaElement).value;
+      if (!nombre || !descripcion) {
+        Swal.showValidationMessage("Por favor ingresa el nombre y la descripción.");
         return false;
       }
-      if (creditos <= 0 || horasSemanales <= 0) {
-        Swal.showValidationMessage("Créditos y Horas Semanales deben ser mayores a 0.");
-        return false;
-      }
-      return { nombre, creditos, horasSemanales, clave };
+      return { nombre, descripcion };
     },
   });
 
@@ -127,25 +109,15 @@ const openCreateModal = async () => {
   }
 };
 
-// Crear una nueva materia
-const createSubject = async (subject: Omit<Subject, "id">) => {
+const createSubject = async (subject: ISubject) => {
   try {
     loading.value = true;
-    // Simulación de llamada a la API
-    // const response = await fetch('URL_API/subjects', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(subject),
-    // });
-    // const createdSubject = await response.json();
-
-    const createdSubject = { ...subject, id: subjects.value.length + 1 };
-    subjects.value.push(createdSubject);
-
+    await PostSubject(subject);
+    subjects.value.push(subject);
     await Swal.fire({
       icon: "success",
       title: "¡Materia creada!",
-      text: `${createdSubject.nombre} ha sido agregada exitosamente.`,
+      text: `${subject.nombre} ha sido agregada exitosamente.`,
       timer: 1500,
       showConfirmButton: false,
     });
@@ -161,16 +133,19 @@ const createSubject = async (subject: Omit<Subject, "id">) => {
   }
 };
 
-// Abrir modal para editar una materia
 const openEditModal = async (index: number) => {
   const subject = subjects.value[index];
   const { value: formValues } = await Swal.fire({
     title: "Editar Materia",
     html: `
-      <input id="swal-nombre" class="swal2-input" value="${subject.nombre}" placeholder="Nombre" />
-      <input id="swal-creditos" class="swal2-input" type="number" value="${subject.creditos}" placeholder="Créditos" />
-      <input id="swal-horasSemanales" class="swal2-input" type="number" value="${subject.horasSemanales}" placeholder="Horas Semanales" />
-      <input id="swal-clave" class="swal2-input" value="${subject.clave}" placeholder="Clave" />
+      <div>
+        <label for="swal-nombre">Nombre:</label>
+        <input type="text" id="swal-nombre" class="swal2-input" value="${subject.nombre}" required/>
+      </div>
+      <div class="mt-3">
+        <label for="swal-descripcion">Descripción:</label>
+        <textarea id="swal-descripcion" class="swal2-textarea" required>${subject.descripcion}</textarea>
+      </div>
     `,
     focusConfirm: false,
     showCancelButton: true,
@@ -178,41 +153,25 @@ const openEditModal = async (index: number) => {
     cancelButtonText: "Cancelar",
     preConfirm: () => {
       const nombre = (document.getElementById("swal-nombre") as HTMLInputElement).value;
-      const creditos = Number((document.getElementById("swal-creditos") as HTMLInputElement).value);
-      const horasSemanales = Number((document.getElementById("swal-horasSemanales") as HTMLInputElement).value);
-      const clave = (document.getElementById("swal-clave") as HTMLInputElement).value;
-
-      if (!nombre || !creditos || !horasSemanales || !clave) {
-        Swal.showValidationMessage("Por favor, completa todos los campos obligatorios.");
+      const descripcion = (document.getElementById("swal-descripcion") as HTMLTextAreaElement).value;
+      if (!nombre || !descripcion) {
+        Swal.showValidationMessage("Por favor ingresa el nombre y la descripción.");
         return false;
       }
-      if (creditos <= 0 || horasSemanales <= 0) {
-        Swal.showValidationMessage("Créditos y Horas Semanales deben ser mayores a 0.");
-        return false;
-      }
-      return { nombre, creditos, horasSemanales, clave };
+      return { id: subject.id, nombre, descripcion };
     },
   });
 
   if (formValues) {
-    await updateSubject(index, { ...formValues, id: subject.id });
+    await updateSubject(index, formValues);
   }
 };
 
-// Actualizar una materia
-const updateSubject = async (index: number, updatedSubject: Subject) => {
+const updateSubject = async (index: number, updatedSubject: ISubject) => {
   try {
     loading.value = true;
-    // Simulación de llamada a la API
-    // const response = await fetch(`URL_API/subjects/${updatedSubject.id}`, {
-    //   method: 'PUT',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(updatedSubject),
-    // });
-    // const updated = await response.json();
-
+    await UpdateSubject(updatedSubject);
     subjects.value[index] = updatedSubject;
-
     await Swal.fire({
       icon: "success",
       title: "¡Materia actualizada!",
@@ -232,7 +191,6 @@ const updateSubject = async (index: number, updatedSubject: Subject) => {
   }
 };
 
-// Confirmar eliminación de una materia
 const confirmDelete = async (index: number) => {
   const subject = subjects.value[index];
   const result = await Swal.fire({
@@ -251,18 +209,12 @@ const confirmDelete = async (index: number) => {
   }
 };
 
-// Eliminar una materia
 const deleteSubject = async (index: number) => {
   const subject = subjects.value[index];
   try {
     loading.value = true;
-    // Simulación de llamada a la API
-    // await fetch(`URL_API/subjects/${subject.id}`, {
-    //   method: 'DELETE',
-    // });
-
+    await DeleteSubject(subject.id);
     subjects.value.splice(index, 1);
-
     await Swal.fire({
       icon: "success",
       title: "¡Materia eliminada!",
@@ -282,44 +234,11 @@ const deleteSubject = async (index: number) => {
   }
 };
 
-// Cargar materias iniciales (Leer)
-const loadSubjects = async () => {
-  try {
-    loading.value = true;
-    // Simulación de llamada a la API
-    // const response = await fetch('URL_API/subjects');
-    // const data = await response.json();
-    // subjects.value = data;
-
-    console.log("Materias cargadas:", subjects.value);
-  } catch (error) {
-    await Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: "No se pudieron cargar las materias.",
-    });
-    console.error("Error al cargar materias:", error);
-  } finally {
-    loading.value = false;
-  }
-};
-
-// Cargar datos al montar el componente
 loadSubjects();
 </script>
 
 <style scoped>
 .shadow-md {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-/* Ajustes para pantallas pequeñas */
-@media (max-width: 640px) {
-  .p-4 {
-    padding: 1rem;
-  }
-  .text-xs {
-    font-size: 0.65rem;
-  }
 }
 </style>
