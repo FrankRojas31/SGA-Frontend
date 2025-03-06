@@ -27,6 +27,7 @@ export const UpdateUnit = async (values: IUnits) => {
     url: `${base}/${values.id}`,
     method: 'PUT',
     data: {
+      id: values.id,
       nombre: values.nombre,
       descripcion: values.descripcion,
       esBorrado: false,
