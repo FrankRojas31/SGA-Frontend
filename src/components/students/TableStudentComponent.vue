@@ -38,6 +38,7 @@
                 @click="openEditModal(index)"
               />
               <Button
+                v-if="authStore.user?.role != 'Admin'"
                 label="Eliminar"
                 severity="danger"
                 outlined
@@ -53,8 +54,13 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import {  ref } from "vue";
 import Swal from "sweetalert2";
+import { useAuthStore } from "@/stores/AuthStore";
+
+const authStore = useAuthStore();
+console.log(authStore.user)
+
 
 // Interfaz para los estudiantes
 interface Student {

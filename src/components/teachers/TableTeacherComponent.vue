@@ -35,6 +35,7 @@
                 @click="openEditModal(index)"
               />
               <Button
+               v-if="authStore.user?.role != 'Admin'"
                 label="Eliminar"
                 severity="danger"
                 outlined
@@ -57,8 +58,10 @@ import Button from "primevue/button";
 import Swal from "sweetalert2";
 import { GetTeachers, PostTeacher, UpdateTeacher, DeleteTeacher } from '@/api/clients/teachers/teachersClient';
 import type { ITeacher } from "@/types/Teachers";
+import { useAuthStore } from "@/stores/AuthStore";
 
 const teachers = ref<ITeacher[]>([]);
+const authStore = useAuthStore();
 
 const loading = ref(false);
 
