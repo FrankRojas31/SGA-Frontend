@@ -67,12 +67,7 @@ const loadUnits = async () => {
   try {
     const response = await GetUnits();
     console.log("data",response.data.data);
-    if (response.status === 200 && Array.isArray(response.data.data)) {
       cards.value = response.data.data.filter(unit => !unit.esBorrado);
-
-    } else {
-      console.error("Formato de respuesta inesperado:", response);
-    }
   } catch (error) {
     console.error("Error al cargar unidades:", error);
   }
@@ -109,8 +104,9 @@ const openCreateModal = async () => {
 const createUnit = async (unit) => {
   try {
     const newUnit = await PostUnit(unit);
+    console.log(newUnit)
     loadUnits()
-    Swal.fire("¡Unidad creada!", `${newUnit.nombre} ha sido agregada.`, "success");
+    Swal.fire("¡Unidad creada!", `${newUnit.data.nombre} ha sido agregada.`, "success");
   } catch (error) {
     Swal.fire("Error", "No se pudo crear la unidad.", "error");
   }

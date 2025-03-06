@@ -26,8 +26,9 @@ export interface IUserStorage {
 export type ILoginUser = Pick<IUser, 'email' | 'password'>;
 
 export enum Rol {
-  ADMIN = '',
+  ADMIN = 'ADMIN',
   ALUMNO = 'ALUMNO',
+  SUPERADMIN = 'SUPERADMIN',
 }
 
 export enum EstatusUsuario {

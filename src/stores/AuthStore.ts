@@ -17,6 +17,8 @@ export const useAuthStore = defineStore('auth', () => {
     },
   })
 
+
+
   const Register = async (values: IUserSend) => {
     try {
       const send: IUser = {
@@ -25,7 +27,7 @@ export const useAuthStore = defineStore('auth', () => {
         password: values.password,
         confirmPassword: values.duoPassword,
         estatusUsuario: EstatusUsuario.ACTIVO,
-        rol: Rol.ALUMNO,
+        rol: Rol.ADMIN,
       }
 
       const response = await RegisterAccount(send)
@@ -64,6 +66,7 @@ export const useAuthStore = defineStore('auth', () => {
         })
 
         user.value = responseHelper.data
+        console.log(user.value)
         router.push('/dashboard')
       } else {
         throw new Error(responseHelper.message || 'Error desconocido')
