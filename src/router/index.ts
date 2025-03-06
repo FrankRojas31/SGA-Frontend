@@ -114,37 +114,37 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to, from, next) => {
-  const verifyAuth = isAuth().value
-  const publicRoutes = ['/login', '/register', '/NotFound']
-  const requiresAuth = !publicRoutes.includes(to.path)
-  const isFirstLoad = !from.path || from.path === '/'
+// router.beforeEach((to, from, next) => {
+//   const verifyAuth = isAuth().value
+//   const publicRoutes = ['/login', '/register', '/NotFound']
+//   const requiresAuth = !publicRoutes.includes(to.path)
+//   const isFirstLoad = !from.path || from.path === '/'
 
-  if (isFirstLoad && to.path === '/') {
-    if (!verifyAuth) {
-      next('/login')
-      return
-    } else {
-      next('/dashboard')
-      return
-    }
-  }
+//   if (isFirstLoad && to.path === '/') {
+//     if (!verifyAuth) {
+//       next('/login')
+//       return
+//     } else {
+//       next('/dashboard')
+//       return
+//     }
+//   }
 
-  if (requiresAuth && !verifyAuth) {
-    if (to.matched.length) {
-      next('/NotFound')
-      return
-    } else {
-      next('/login')
-      return
-    }
-  }
+//   if (requiresAuth && !verifyAuth) {
+//     if (to.matched.length) {
+//       next('/NotFound')
+//       return
+//     } else {
+//       next('/login')
+//       return
+//     }
+//   }
 
-  if (verifyAuth && (to.name === 'login' || to.name === 'register')) {
-    next('/dashboard')
-    return
-  }
+//   if (verifyAuth && (to.name === 'login' || to.name === 'register')) {
+//     next('/dashboard')
+//     return
+//   }
 
-  next()
-})
+//   next()
+// })
 export default router

@@ -1,6 +1,5 @@
 <template>
   <div class="p-4">
-    <!-- Botón para abrir el modal de agregar -->
     <div class="mb-6">
       <Button
         label="Agregar Nueva Unidad"
@@ -9,39 +8,19 @@
       />
     </div>
 
-    <!-- Lista de unidades temáticas -->
     <div class="flex flex-wrap gap-4 justify-center">
       <Card
         v-for="(card, index) in cards"
-        :key="index"
+        :key="card.id"
         class="w-full sm:w-72 md:w-64 lg:w-60 overflow-hidden shadow-md"
       >
         <template #title>
-          <span v-if="!card.isEditing">{{ card.title }}</span>
-          <input
-            v-else
-            v-model="card.title"
-            class="w-full p-1 border rounded text-sm"
-          />
+          <span v-if="!card.isEditing">{{ card.nombre }}</span>
+          <input v-else v-model="card.nombre" class="w-full p-1 border rounded text-sm" />
         </template>
         <template #subtitle>
-          <span v-if="!card.isEditing">{{ card.subtitle }}</span>
-          <input
-            v-else
-            v-model="card.subtitle"
-            class="w-full p-1 border rounded text-sm"
-          />
-        </template>
-        <template #content>
-          <p v-if="!card.isEditing" class="m-0 text-sm text-gray-700">
-            {{ card.content }}
-          </p>
-          <textarea
-            v-else
-            v-model="card.content"
-            class="w-full p-1 border rounded text-sm"
-            rows="2"
-          ></textarea>
+          <span v-if="!card.isEditing">{{ card.descripcion }}</span>
+          <input v-else v-model="card.descripcion" class="w-full p-1 border rounded text-sm" />
         </template>
         <template #footer>
           <div class="flex gap-2 mt-2">
@@ -74,64 +53,50 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import Swal from "sweetalert2";
 import Card from "primevue/card";
 import Button from "primevue/button";
-import Swal from "sweetalert2";
+import { GetUnits, PostUnits, UpdateUnits, DeleteUnit } from "@/api/clients/units/unitsClient";
 
-// Interfaz para las unidades temáticas
-interface UnitCard {
-  id?: number;
-  title: string;
-  subtitle: string;
-  content: string;
-  isEditing?: boolean;
-}
 
-// Estado para las unidades existentes
-const cards = ref<UnitCard[]>([
-  {
-    id: 1,
-    title: "Álgebra Básica",
-    subtitle: "Semestre 1",
-    content: "Introducción a ecuaciones lineales y polinomios.",
-  },
-  {
-    id: 2,
-    title: "Geografía Mundial",
-    subtitle: "Semestre 2",
-    content: "Estudio de continentes, océanos y climas.",
-  },
-  {
-    id: 3,
-    title: "Literatura Clásica",
-    subtitle: "Semestre 1",
-    content: "Análisis de obras de Shakespeare y Cervantes.",
-  },
-]);
+const cards = ref([]);
 
-// Abrir modal para agregar una nueva unidad
+
+const loadUnits = async () => {
+  try {
+    const response = await GetUnits();
+    console.log("data",response.data.data);
+    if (response.status === 200 && Array.isArray(response.data.data)) {
+      cards.value = response.data.data.filter(unit => !unit.esBorrado);
+
+    } else {
+      console.error("Formato de respuesta inesperado:", response);
+    }
+  } catch (error) {
+    console.error("Error al cargar unidades:", error);
+  }
+};
+
 const openCreateModal = async () => {
   const { value: formValues } = await Swal.fire({
-    title: "Agregar Nueva Unidad Temática",
+    title: "Agregar Nueva Unidad",
     html: `
-      <input id="swal-title" class="swal2-input" placeholder="Título" />
-      <input id="swal-subtitle" class="swal2-input" placeholder="Subtítulo" />
-      <textarea id="swal-content" class="swal2-textarea" placeholder="Contenido"></textarea>
+      <input id="swal-nombre" class="swal2-input" placeholder="Nombre" />
+      <textarea id="swal-descripcion" class="swal2-textarea" placeholder="Descripción"></textarea>
     `,
     focusConfirm: false,
     showCancelButton: true,
     confirmButtonText: "Agregar",
     cancelButtonText: "Cancelar",
     preConfirm: () => {
-      const title = (document.getElementById("swal-title") as HTMLInputElement).value;
-      const subtitle = (document.getElementById("swal-subtitle") as HTMLInputElement).value;
-      const content = (document.getElementById("swal-content") as HTMLTextAreaElement).value;
-      if (!title || !content) {
-        Swal.showValidationMessage("Por favor, completa el título y el contenido.");
+      const nombre = (document.getElementById("swal-nombre") as HTMLInputElement).value;
+      const descripcion = (document.getElementById("swal-descripcion") as HTMLTextAreaElement).value;
+      if (!nombre || !descripcion) {
+        Swal.showValidationMessage("Completa todos los campos.");
         return false;
       }
-      return { title, subtitle, content };
+      return { nombre, descripcion };
     },
   });
 
@@ -141,87 +106,41 @@ const openCreateModal = async () => {
 };
 
 // Crear una nueva unidad
-const createUnit = async (unit: UnitCard) => {
+const createUnit = async (unit) => {
   try {
-    // Simulación de llamada a la API
-    // const response = await fetch('URL_API/units', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(unit),
-    // });
-    // const createdUnit = await response.json();
-
-    const createdUnit = { ...unit, id: cards.value.length + 1 };
-    cards.value.push(createdUnit);
-
-    await Swal.fire({
-      icon: "success",
-      title: "¡Unidad creada!",
-      text: `${createdUnit.title} ha sido agregada exitosamente.`,
-      timer: 1500,
-      showConfirmButton: false,
-    });
+    const newUnit = await PostUnits(unit);
+    loadUnits()
+    Swal.fire("¡Unidad creada!", `${newUnit.nombre} ha sido agregada.`, "success");
   } catch (error) {
-    await Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: "No se pudo crear la unidad. Intenta de nuevo.",
-    });
-    console.error("Error al crear unidad:", error);
+    Swal.fire("Error", "No se pudo crear la unidad.", "error");
   }
 };
 
-// Habilitar edición de una unidad
-const editCard = (index: number) => {
+// Habilitar edición
+const editCard = (index) => {
   cards.value[index].isEditing = true;
 };
 
-// Actualizar una unidad
-const updateCard = async (index: number) => {
-  const unitToUpdate = { ...cards.value[index], isEditing: false };
-  if (!unitToUpdate.title || !unitToUpdate.content) {
-    await Swal.fire({
-      icon: "warning",
-      title: "Campos incompletos",
-      text: "Por favor, completa el título y el contenido.",
-    });
-    return;
-  }
+// Guardar cambios en una unidad
+const updateCard = async (index) => {
+  const unitToUpdate = cards.value[index];
 
   try {
-    // Simulación de llamada a la API
-    // const response = await fetch(`URL_API/units/${unitToUpdate.id}`, {
-    //   method: 'PUT',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(unitToUpdate),
-    // });
-    // const updatedUnit = await response.json();
+    await UpdateUnits(unitToUpdate);
+    unitToUpdate.isEditing = false;
 
-    cards.value[index] = unitToUpdate;
-
-    await Swal.fire({
-      icon: "success",
-      title: "¡Unidad actualizada!",
-      text: `${unitToUpdate.title} ha sido actualizada exitosamente.`,
-      timer: 1500,
-      showConfirmButton: false,
-    });
+    Swal.fire("¡Unidad actualizada!", "Los cambios han sido guardados.", "success");
   } catch (error) {
-    await Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: "No se pudo actualizar la unidad. Intenta de nuevo.",
-    });
-    console.error("Error al actualizar unidad:", error);
+    Swal.fire("Error", "No se pudo actualizar la unidad.", "error");
   }
 };
 
-// Confirmar eliminación de una unidad
-const confirmDelete = async (index: number) => {
+// Confirmar eliminación
+const confirmDelete = async (index) => {
   const result = await Swal.fire({
     icon: "warning",
-    title: "¿Estás seguro?",
-    text: `Eliminarás "${cards.value[index].title}". Esta acción no se puede deshacer.`,
+    title: "¿Eliminar unidad?",
+    text: `Eliminarás "${cards.value[index].nombre}". Esta acción no se puede deshacer.`,
     showCancelButton: true,
     confirmButtonText: "Sí, eliminar",
     cancelButtonText: "Cancelar",
@@ -235,59 +154,17 @@ const confirmDelete = async (index: number) => {
 };
 
 // Eliminar una unidad
-const deleteCard = async (index: number) => {
+const deleteCard = async (index) => {
   const unitId = cards.value[index].id;
-  const unitTitle = cards.value[index].title;
   try {
-    // Simulación de llamada a la API
-    // await fetch(`URL_API/units/${unitId}`, {
-    //   method: 'DELETE',
-    // });
-
+    await DeleteUnit(unitId);
     cards.value.splice(index, 1);
-
-    await Swal.fire({
-      icon: "success",
-      title: "¡Unidad eliminada!",
-      text: `${unitTitle} ha sido eliminada exitosamente.`,
-      timer: 1500,
-      showConfirmButton: false,
-    });
+    Swal.fire("¡Unidad eliminada!", "Se ha eliminado correctamente.", "success");
   } catch (error) {
-    await Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: "No se pudo eliminar la unidad. Intenta de nuevo.",
-    });
-    console.error("Error al eliminar unidad:", error);
-  }
-};
-
-// Cargar unidades iniciales (Leer)
-const loadUnits = async () => {
-  try {
-    // Simulación de llamada a la API
-    // const response = await fetch('URL_API/units');
-    // const data = await response.json();
-    // cards.value = data;
-
-    console.log("Unidades cargadas:", cards.value);
-  } catch (error) {
-    await Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: "No se pudieron cargar las unidades.",
-    });
-    console.error("Error al cargar unidades:", error);
+    Swal.fire("Error", "No se pudo eliminar la unidad.", "error");
   }
 };
 
 // Cargar datos al montar el componente
-loadUnits();
+onMounted(loadUnits);
 </script>
-
-<style scoped>
-.shadow-md {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-</style>

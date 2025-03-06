@@ -1,37 +1,38 @@
-import { ConnectionAPI } from '@/api/connectionAPI'
-import { GenericRequest } from '@/api/genericRequest'
+import { ConnectionAPI } from "@/api/connectionAPI";
+import { GenericRequest } from "@/api/genericRequest";
 
-const url = ConnectionAPI()
-const base = url + '/Unidades'
+const url = ConnectionAPI();
+const base = url + "/Unidades";
 
 export const GetUnits = async () => {
-  return await GenericRequest({ url: base, method: 'GET' })
-}
+  console.log(base)
+  return await GenericRequest({ url: base, method: "GET" });
+};
 
 export const PostUnits = async (values) => {
   return await GenericRequest({
     url: base,
-    method: 'POST',
+    method: "POST",
     data: {
       nombre: values.nombre,
       descripcion: values.descripcion,
       esBorrado: false,
     },
-  })
-}
+  });
+};
 
 export const UpdateUnits = async (values) => {
   return await GenericRequest({
-    url: base,
-    method: 'PUT',
+    url: `${base}/${values.id}`,
+    method: "PUT",
     data: {
       nombre: values.nombre,
       descripcion: values.descripcion,
-      esBorrado: values.esBorrado,
+      esBorrado: values.esBorrado || false,
     },
-  })
-}
+  });
+};
 
 export const DeleteUnit = async (id: number) => {
-  return await GenericRequest({ url: `${base}/${id}`, method: 'DELETE' })
-}
+  return await GenericRequest({ url: `${base}/${id}`, method: "DELETE" });
+};
